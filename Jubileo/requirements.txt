@@ -6,3 +6,4 @@ Flask-Login
 PyMySQL
 bcrypt
 WeasyPrint
+gunicorn
