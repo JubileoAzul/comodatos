@@ -1,4 +1,3 @@
-
 import sys
 import traceback
 import logging
@@ -199,7 +198,7 @@ El equipo de Jubileo Azul
                 else:
                     logger.warning(f"No se pudo enviar correo de vencimiento al cliente para el comodato {comodato_data.idComodato}: No hay correo electrónico del cliente.")
 
-                encargado_email = '23300101@uttt.edu.mx' 
+                encargado_email = app.config.get('ADMIN_EMAIL') # Usar app.config.get para leer ADMIN_EMAIL
                 if encargado_email:
                     asunto_encargado = f"[ENCARGADO] Vencimiento Próximo: Comodato ID {comodato_data.idComodato} - {comodato_data.concepto}"
                     cuerpo_encargado = f"""
@@ -259,6 +258,12 @@ def create_app():
     login_manager.login_message = "Por favor, inicia sesión para acceder a esta página."
     login_manager.login_message_category = "info" 
 
+    # Mover db.create_all() aquí para que se ejecute en producción
+    with _app.app_context():
+        db.create_all() 
+        logger.info("Tablas de la base de datos verificadas/creadas en el contexto de la aplicación.")
+
+
     @login_manager.user_loader
     def load_user(user_id):
         with _app.app_context(): # Usa _app aquí también
@@ -287,10 +292,10 @@ if __name__ == '__main__':
     try:
         logger.info("Aplicación Flask inicializada.")
 
-        with app.app_context():
-            db.create_all() 
-            logger.info("Tablas de la base de datos verificadas/creadas.")
+        # db.create_all() ya no es necesario aquí si se mueve a create_app()
+        # logger.info("Tablas de la base de datos verificadas/creadas.")
 
+        with app.app_context(): # Ahora app ya está inicializada
             logger.info("Ejecutando verificación de vencimientos manualmente para prueba...")
             verificar_vencimientos()
             logger.info("Verificación de vencimientos manual completada.")
