@@ -14,11 +14,11 @@ class Config:
     MAIL_PORT = int(os.environ.get('MAIL_PORT') or 587)
     MAIL_USE_TLS = os.environ.get('MAIL_USE_TLS') is not None
     MAIL_USE_SSL = os.environ.get('MAIL_USE_SSL') is not None
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME') or 'notificaciones.jubileoazul@gmail.com' # ¡CAMBIAR POR TU CORREO!
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') or 'dkwq hvhy bqkb ktzi' # ¡CAMBIAR POR TU CONTRASEÑA DE APLICACIÓN!
-    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER') or 'notificaciones.jubileoazul@gmail.com' # ¡CAMBIAR POR TU CORREO!
+    MAIL_USERNAME = os.environ.get('MAIL_USERNAME') or '' # ¡CAMBIAR POR TU CORREO!
+    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD') or '' # ¡CAMBIAR POR TU CONTRASEÑA DE APLICACIÓN!
+    MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER') or '' # ¡CAMBIAR POR TU CORREO!
     # En tu archivo config.py
-    ADMIN_EMAIL = '23300101@uttt.edu.mx'
+    ADMIN_EMAIL = ''
     
     # Clave secreta para la seguridad de la sesión de Flask
     # ¡GENERAR UNA CLAVE MUY LARGA Y COMPLEJA PARA PRODUCCIÓN!
