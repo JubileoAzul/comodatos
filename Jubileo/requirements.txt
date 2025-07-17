@@ -1,0 +1,6 @@
+Flask
+Flask-MySQLdb
+bcrypt
+Flask-Mail
+Flask-SQLAlchemy
+Flask-APScheduler

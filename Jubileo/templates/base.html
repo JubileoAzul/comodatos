@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mi Aplicación Flask{% endblock %}</title>
+    {# Puedes enlazar tus archivos CSS aquí #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}" type="image/png">
+</head>
+<body>
+    
+
+    <main>
+        {# Aquí se mostrarán los mensajes flash #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flashes">
+                    {% for category, message in messages %}
+                        <li class="{{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        {# El contenido específico de cada página se insertará aquí #}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        {# Pie de página de la aplicación #}
+        <p>&copy; {{ now().year }} Mi Aplicación Flask</p>
+    </footer>
+
+    {# Puedes enlazar tus archivos JavaScript aquí #}
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script>
+        // Función para obtener el año actual, si necesitas mostrarlo dinámicamente
+        function now() {
+            return new Date().getFullYear();
+        }
+    </script>
+</body>
+</html>

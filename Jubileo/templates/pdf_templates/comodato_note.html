@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nota de Comodato - Jubileo Azul</title>
+    <style>
+        /* Estilos generales para el documento PDF */
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 9pt; /* Ligeramente reducido para caber en una página */
+            line-height: 1.25; /* Más compacto */
+            color: #333;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Estilos para la página (WeasyPrint usa @page para esto) */
+        @page {
+            size: letter; /* Tamaño de papel carta */
+            margin: 1.2cm; /* Márgenes aún más reducidos */
+            @bottom-right {
+                content: "Página " counter(page) " de " counter(pages);
+                font-size: 7.5pt; /* Fuente del paginado más pequeña */
+                color: #666;
+            }
+        }
+
+        .container {
+            width: 100%;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 7pt; /* Más compacto */
+            padding-bottom: 4pt; /* Pequeño padding inferior para el borde */
+            border-bottom: 1px solid #ccc; /* Borde sutil para separar el encabezado */
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px; /* Espacio entre el logo y el texto */
+        }
+
+        .logo {
+            max-width: 140pt; /* Logo ligeramente más pequeño */
+            height: auto;
+            vertical-align: middle;
+        }
+
+        .company-info {
+            font-size: 8pt; /* Fuente ligeramente más pequeña */
+            line-height: 1.05; /* Más compacto */
+        }
+
+        .company-info h1 {
+            font-size: 12pt; /* Título de empresa más pequeño */
+            color: #003366;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .company-info p {
+            margin: 1pt 0; /* Márgenes muy pequeños */
+            color: #555;
+        }
+
+        .header-right {
+            text-align: right;
+            font-size: 9pt; /* Ligeramente más pequeño */
+            font-weight: bold;
+            color: #003366;
+        }
+
+        .header-right span {
+            font-size: 12pt; /* Folio más grande, ajustado */
+            color: #D9534F;
+        }
+
+        .title-bar {
+            text-align: center;
+            font-size: 12pt; /* Título de barra más pequeño */
+            font-weight: bold;
+            color: #003366;
+            margin-bottom: 7pt; /* Más compacto */
+            padding: 3pt 0; /* Menos padding */
+            border-bottom: 1px solid #ddd;
+            border-top: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+
+        /* Contenedores para campos con bordes y columnas */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2px; /* Espacio aún más pequeño entre celdas del grid */
+            margin-bottom: 8pt; /* Más compacto */
+            border: 2px solid #555; /* Borde más oscuro y grueso para el grid principal */
+            padding: 3px; /* Menos padding */
+            border-radius: 3px; /* Bordes ligeramente redondeados */
+        }
+
+        .info-field {
+            border: 1px solid #bbb; /* Borde más oscuro para cada campo */
+            padding: 2px 3px; /* Menos padding */
+            font-size: 8.5pt; /* Fuente más pequeña para los campos */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .info-field strong {
+            display: block;
+            font-size: 6.5pt; /* Etiqueta más pequeña */
+            color: #666;
+            margin-bottom: 0.5pt; /* Márgenes muy pequeños */
+        }
+
+        .info-field.full-width {
+            grid-column: span 4;
+            white-space: normal; 
+            text-overflow: clip; 
+            overflow: visible; 
+        }
+        .info-field.span-2 {
+            grid-column: span 2;
+        }
+        
+        /* Ajuste para los "X" de las opciones (Tipo de Cliente, Motivo Préstamo) */
+        .info-field .checkbox-box {
+            font-size: 0.9em !important; 
+            font-weight: bold; 
+        }
+
+        /* Estilos para tablas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 8pt; /* Más compacto */
+            font-size: 8.5pt; /* Fuente de tabla más pequeña */
+        }
+
+        table th, table td {
+            border: 1px solid #777; 
+            padding: 3pt 5pt; /* Menos padding */
+            text-align: left;
+        }
+
+        table th {
+            background-color: #d0d0d0; 
+            color: #333;
+            font-weight: bold;
+        }
+
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+
+        /* Cláusulas y condiciones */
+        .clauses {
+            margin-top: 8pt; /* Más compacto */
+            margin-bottom: 8pt; 
+            font-size: 7.5pt; /* Texto más pequeño para las cláusulas */
+            line-height: 1.15; /* Más compacto */
+            text-align: justify;
+            border: 1px solid #888; 
+            padding: 5pt; /* Menos padding */
+            background-color: #fcfcfc;
+            border-radius: 3px;
+        }
+
+        .signature-block {
+            margin-top: 15pt; /* Reducido para ahorrar espacio */
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+
+        .signature-item {
+            flex-basis: 30%; 
+            display: flex; /* Convierte cada item en un contenedor flex */
+            flex-direction: column; /* Apila los contenidos verticalmente */
+            align-items: center; /* Centra horizontalmente el contenido de cada item */
+            padding: 0; /* Reinicia padding para control total con márgenes */
+            min-height: 70pt; /* Ajusta según el contenido, asegura "mismo vuelo" */
+            justify-content: flex-end; /* Alinea los elementos al final del contenedor flex */
+        }
+
+        .signature-role-title {
+            font-size: 7.5pt; /* Similar a signature-text */
+            color: #555;
+            line-height: 1.05;
+            margin-bottom: 25pt; /* AUMENTADO SIGNIFICATIVAMENTE: Espacio para la firma manual */
+        }
+
+        /* Removido: .signature-printed-name */ /* Ya no se usa para poner el nombre/línea punteada */
+
+        /* La única línea visible en las firmas: la gruesa sobre "NOMBRE Y FIRMA" */
+        .signature-line {
+            display: block;
+            width: 80%; /* Un poco más larga */
+            margin: 0 auto; /* Centra la línea */
+            border-bottom: 2px solid #000; /* La línea más gruesa y resaltada */
+            margin-bottom: 5pt; /* Reducido para que esté más pegada a "NOMBRE Y FIRMA" */
+        }
+        
+        .signature-label { /* Para "NOMBRE Y FIRMA" */
+            font-size: 7.5pt; /* Texto de firma más pequeño */
+            color: #555;
+            line-height: 1.05;
+        }
+
+        .footer-address {
+            font-size: 7pt; /* Fuente más pequeña para el pie de página */
+            color: #777;
+            text-align: center;
+            margin-top: 10pt; /* Más compacto */
+            border-top: none !important; /* AÑADIDO: Elimina la línea superior del footer */
+            padding-top: 6pt; /* Menos padding */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <img src="static/images/image.png" alt="Logo Jubileo Azul" class="logo">
+                <div class="company-info">
+                    <h1>JUBILEO AZUL S.A. DE C.V.</h1>
+                    <p>COMODATO DE MATERIAL</p>
+                </div>
+            </div>
+            <div class="header-right">
+                <p>FOLIO No. <span>{{ cliente.NoFolio if cliente.NoFolio else 'N/A' }}</span></p>
+            </div>
+        </header>
+
+        <div class="info-grid">
+            <div class="info-field span-2"><strong>FECHA:</strong> <span>{{ cliente.fechaPrestamo.strftime('%d-%m-%Y') if cliente.fechaPrestamo else 'N/A' }}</span></div>
+            <div class="info-field span-2"><strong>No. DE CLIENTE:</strong> <span>{{ cliente.NoCliente if cliente.NoCliente else 'N/A' }}</span></div> {# <--- CAMBIO AQUÍ: Usar cliente.NoCliente #}
+
+            <div class="info-field span-2"><strong>TIPO DE CLIENTE:</strong> EMPRESARIAL <span class="checkbox-box">{% if cliente.tipoCliente == 'Empresarial' %}X{% else %}&nbsp;&nbsp;{% endif %}</span>&nbsp;&nbsp; HOGAR <span class="checkbox-box">{% if cliente.tipoCliente == 'Hogar' %}X{% else %}&nbsp;&nbsp;{% endif %}</span>&nbsp;&nbsp; ABARROTES <span class="checkbox-box">{% if cliente.tipoCliente == 'Abarrotes' %}X{% else %}&nbsp;&nbsp;{% endif %}</span></div>
+            <div class="info-field span-2"><strong>RUTA:</strong> <span>{{ cliente.ruta if cliente.ruta else 'N/A' }}</span></div>
+
+            <div class="info-field span-2"><strong>NOMBRE COMERCIAL:</strong> <span>{{ cliente.nombreComercial if cliente.nombreComercial else 'N/A' }}</span></div>
+            <div class="info-field span-2"><strong>NUM:</strong> <span>{{ cliente.numero if cliente.numero else 'N/A' }}</span>&nbsp;&nbsp; <strong>EXT:</strong> <span>{{ cliente.extension if cliente.extension else 'N/A' }}</span></div>
+
+            <div class="info-field span-2"><strong>TEL (S):</strong> <span>{{ cliente.telefono if cliente.telefono else 'N/A' }}</span></div>
+            <div class="info-field span-2"><strong>COLONIA:</strong> <span>{{ cliente.colonia if cliente.colonia else 'N/A' }}</span></div>
+            
+            {# AÑADIDO: Email del Cliente debajo de Colonia #}
+            <div class="info-field span-2"><strong>EMAIL:</strong> <span>{{ cliente.email if cliente.email else 'N/A' }}</span></div>
+            <div class="info-field span-2"></div> {# Celda vacía para completar la fila #}
+
+            <div class="info-field full-width"><strong>DIRECCION DE ENTREGA:</strong> CALLE <span>{{ cliente.calle if cliente.calle else 'N/A' }}</span> NO. <span>{{ cliente.numero if cliente.numero else 'N/A' }}</span> COL. <span>{{ cliente.colonia if cliente.colonia else 'N/A' }}</span> C.P. <span>{{ cliente.cp if cliente.cp.strip() else 'N/A' }}</span></div>
+
+            <div class="info-field span-2"><strong>MUNICIPIO:</strong> <span>{{ cliente.municipio if cliente.municipio else 'N/A' }}</span></div>
+            <div class="info-field span-2"><strong>ESTADO:</strong> <span>{{ cliente.estado if cliente.estado else 'N/A' }}</span></div>
+
+            <div class="info-field full-width"><strong>CONDICIONES DE COMODATO</strong></div>
+
+            <div class="info-field span-2">
+                <strong>MOTIVO DE PRESTAMO:</strong> 
+                EVENTO ESPECIAL <span class="checkbox-box">&nbsp;&nbsp;</span>&nbsp;&nbsp; 
+                ANUAL <span class="checkbox-box">X</span>&nbsp;&nbsp; 
+                PATROCINIO <span class="checkbox-box">&nbsp;&nbsp;</span>&nbsp;&nbsp; 
+                OTRO <span class="checkbox-box">&nbsp;&nbsp;</span>
+            </div>
+            <div class="info-field span-2"><strong>FOLIO DE SUSTITUCION:</strong> <span>{{ main_comodato_ref.folioSustitucion if main_comodato_ref.folioSustitucion else 'N/A' }}</span></div>
+
+            <div class="info-field span-2"><strong>FECHA DE DEVOLUCION DE MATERIAL:</strong> <span>{{ main_comodato_ref.fechaDevolucion.strftime('%d-%m-%Y') if main_comodato_ref.fechaDevolucion else 'N/A' }}</span></div>
+            <div class="info-field span-2"></div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 10%;" class="text-center">CANTIDAD</th>
+                    <th style="width: 10%;" class="text-center">U.M.</th>
+                    <th style="width: 40%;">CONCEPTO</th>
+                    <th style="width: 20%;" class="text-right">COSTO</th>
+                    <th style="width: 20%;" class="text-right">IMPORTE</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in comodato_items %}
+                <tr>
+                    <td class="text-center">{{ item.cantidad | default('0') }}</td>
+                    <td class="text-center">{{ item.UM | default('N/A') }}</td>
+                    <td>{{ item.concepto | default('N/A') }}</td>
+                    <td class="text-right">${{ "%.2f"|format(item.costo | float | default(0.0)) }}</td>
+                    <td class="text-right">${{ "%.2f"|format(item.importe | float | default(0.0)) }}</td>
+                </tr>
+                {% endfor %}
+                
+                {% set num_items = comodato_items|length %}
+                {% if num_items < 4 %} {# Reducido a 4 filas mínimas para más espacio #}
+                    {% for i in range(4 - num_items) %} 
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" class="text-right" style="border: none; padding-right: 5pt;">
+                        <strong>IMPORTE EN GARANTIA:</strong> SI <span class="checkbox-box">{% if main_comodato_ref.importeEnGarantia %}X{% else %}&nbsp;&nbsp;{% endif %}</span>&nbsp;&nbsp; NO <span class="checkbox-box">{% if not main_comodato_ref.importeEnGarantia %}X{% else %}&nbsp;&nbsp;{% endif %}</span>
+                    </td>
+                    <td class="text-right" style="border: none; font-weight: bold;">IMPORTE TOTAL</td>
+                    <td class="text-right" style="background-color: #f2f2f2; font-weight: bold;">${{ "%.2f"|format(grand_total_importe) }}</td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <div class="clauses">
+            <p>
+                Recibí en calidad de préstamo o de los artículos propiedad de la planta Purificadora Jubileo Azul, S.A. de C.V. por la venta exclusiva de agua purificada Marca Registrada Jubileo Azul; me comprometo a devolver el material antes descrito en el término de préstamo o lo devolveré en el caso que la empresa Jubileo Azul así lo requiera. Asumo la responsabilidad por pérdidas de lo anteriormente descrito, de lo contrario pagaré en una sola exhibición el importe del presente documento.
+            </p>
+        </div>
+
+        <div class="signature-block">
+            <div class="signature-item">
+                <span class="signature-role-title">EL CLIENTE</span><br>
+                {# El espacio para el nombre impreso/firma va aquí, por eso el margen inferior del título es grande #}
+                <span class="signature-line"></span><br> 
+                <span class="signature-label">NOMBRE Y FIRMA</span>
+            </div>
+            <div class="signature-item">
+                <span class="signature-role-title">EL VENDEDOR</span><br>
+                {# Espacio para firma #}
+                <span class="signature-line"></span><br> 
+                <span class="signature-label">NOMBRE Y FIRMA</span>
+            </div>
+            <div class="signature-item">
+                <span class="signature-role-title">AUTORIZA</span><br>
+                {# Espacio para firma #}
+                <span class="signature-line"></span><br> 
+                <span class="signature-label">NOMBRE Y FIRMA</span>
+            </div>
+        </div>
+
+        <div class="footer-address">
+            <p>AV. CRUZ AZUL S/N COL. CENTRO, CD. COOPERATIVA CRUZ AZUL, TULA DE ALLENDE, HGO. C.P. 42840</p>
+            <p>TEL: (S) 01 (773) 785 1962 / 785 2231 E-MAIL: plantajubileo@prodigy.net.mx</p>
+            <p>FTVE - 12</p>
+        </div>
+    </div>
+</body>
+</html>

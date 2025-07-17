@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Comodato - Jubileo Azul</title>
+    <!-- Incluir Tailwind CSS desde CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}" type="image/png">
+    <style>
+        /* Estilos personalizados para mensajes flash */
+        .flashes {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.25rem;
+        }
+        .flashes.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .flashes.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .flashes.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* --- ESTILOS GENERALES (SIMILARES A LISTAR Y LOGIN) --- */
+        body {
+            background: linear-gradient(to bottom right, #e0f2f7, #bbdefb); /* Degradado de azul */
+            font-family: 'Inter', sans-serif; /* Usar Inter como fuente */
+            min-height: 100vh; /* Asegura que el degradado cubra toda la altura */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex-grow: 1; /* Permite que el contenido principal ocupe el espacio disponible */
+            padding: 1rem; /* Pequeño padding para el contenido principal */
+        }
+
+        /* Estilo para el encabezado de la página */
+        .page-header {
+            background-color: #003366; /* Azul oscuro para el fondo del encabezado */
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Centrar el contenido del encabezado */
+            border-bottom-left-radius: 1rem;
+            border-bottom-right-radius: 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-header .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .page-header .logo {
+            max-width: 13rem; /* Tamaño del logo */
+            height: auto;
+            border-radius: 0.5rem; /* Bordes redondeados para el logo */
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem; /* Título más grande */
+            font-weight: 800; /* Extra bold */
+            color: #e3f2fd; /* Azul muy claro para el título */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Sombra para resaltar */
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Estilo para el footer */
+        .app-footer {
+            background-color: #003366; /* Azul oscuro, igual que el encabezado */
+            color: white;
+            padding: 1rem 2rem;
+            text-align: center;
+            font-size: 0.9rem;
+            border-top-left-radius: 1rem;
+            border-top-right-radius: 1rem;
+            margin-top: 2rem; /* Margen superior para separarlo del contenido */
+            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .app-footer p {
+            margin: 0.5rem 0;
+        }
+        .app-footer a {
+            color: #a7d9f8; /* Un azul más claro para enlaces en el footer */
+            text-decoration: none;
+        }
+        .app-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+    <header class="page-header">
+        <div class="logo-container">
+            <!-- Reemplaza esta URL con la ruta a tu logo real -->
+            <img src="/static/images/logo2.png" alt="Logo Jubileo Azul" class="logo">
+            <h1>Agregar Comodato</h1>
+        </div>
+    </header>
+
+    <div class="container mx-auto p-4 main-content">
+        {% for message in get_flashed_messages(with_categories=true) %}
+            <div class="flashes {{ message[0] }} p-3 mb-3 rounded">
+                {{ message[1] }}
+            </div>
+        {% endfor %}
+
+        <form method="POST" action="{{ url_for('comodatos.agregar_comodato') }}" class="bg-white shadow-lg rounded-lg p-6 mb-8 rounded-xl border-2 border-blue-200"> {# Borde más visible y sombra más fuerte #}
+            <h2 class="text-2xl font-bold mb-6 text-gray-800 text-center">Agregar Nuevo Comodato</h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {# Columna Izquierda: Datos del Cliente #}
+                <div>
+                    <h3 class="text-xl font-semibold mb-4 text-gray-700">Datos del Cliente</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label for="NoFolio" class="block text-gray-700 text-sm font-bold mb-2">No. Folio (*)</label>
+                            <input type="text" name="NoFolio" id="NoFolio" 
+                                   value="{{ no_folio_cliente_pre if no_folio_cliente_pre else (form.NoFolio if form.NoFolio else '') }}"
+                                   class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required> {# Borde más fuerte y anillo en foco #}
+                        </div>
+                        <div class="form-group">
+                            <label for="NoCliente" class="block text-gray-700 text-sm font-bold mb-2">No. de Cliente (*)</label>
+                            <input type="text" name="NoCliente" id="NoCliente" 
+                                   value="{{ no_folio_cliente_pre if no_folio_cliente_pre else (form.NoFolio if form.NoFolio else '') }}"
+                                   class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required> {# Borde más fuerte y anillo en foco #}
+                        </div>
+                        <div class="form-group">
+                            <label for="nombreComercial" class="block text-gray-700 text-sm font-bold mb-2">Nombre Comercial (*)</label>
+                            <input type="text" name="nombreComercial" id="nombreComercial" value="{{ form.nombreComercial if form.nombreComercial else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="tipoCliente" class="block text-gray-700 text-sm font-bold mb-2">Tipo de Cliente (*)</label>
+                            <input type="text" name="tipoCliente" id="tipoCliente" value="{{ form.tipoCliente if form.tipoCliente else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="fechaPrestamo" class="block text-gray-700 text-sm font-bold mb-2">Fecha de Préstamo (*)</label>
+                            <input type="date" name="fechaPrestamo" id="fechaPrestamo" value="{{ form.fechaPrestamo if form.fechaPrestamo else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ruta" class="block text-gray-700 text-sm font-bold mb-2">Ruta</label>
+                            <input type="text" name="ruta" id="ruta" value="{{ form.ruta if form.ruta else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div class="form-group">
+                            <label for="telefono" class="block text-gray-700 text-sm font-bold mb-2">Teléfono</label>
+                            <input type="tel" name="telefono" id="telefono" value="{{ form.telefono if form.telefono else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                            <input type="email" name="email" id="email" value="{{ form.email if form.email else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div class="form-group">
+                            <label for="calle" class="block text-gray-700 text-sm font-bold mb-2">Calle</label>
+                            <input type="text" name="calle" id="calle" value="{{ form.calle if form.calle else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div class="form-group">
+                            <label for="numero" class="block text-gray-700 text-sm font-bold mb-2">Número</label>
+                            <input type="text" name="numero" id="numero" value="{{ form.numero if form.numero else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div class="form-group">
+                            <label for="colonia" class="block text-gray-700 text-sm font-bold mb-2">Colonia</label>
+                            <input type="text" name="colonia" id="colonia" value="{{ form.colonia if form.colonia else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div class="form-group">
+                            <label for="municipio" class="block text-gray-700 text-sm font-bold mb-2">Municipio</label>
+                            <input type="text" name="municipio" id="municipio" value="{{ form.municipio if form.municipio else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div class="form-group">
+                            <label for="estado" class="block text-gray-700 text-sm font-bold mb-2">Estado</label>
+                            <input type="text" name="estado" id="estado" value="{{ form.estado if form.estado else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div class="form-group">
+                            <label for="cp" class="block text-gray-700 text-sm font-bold mb-2">CP</label>
+                            <input type="text" name="cp" id="cp" value="{{ form.cp if form.cp else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                </div>
+
+                {# Columna Derecha: Datos del Comodato - Ahora con la línea divisoria vertical para pantallas grandes #}
+                <div class="lg:border-l-2 lg:border-gray-300 lg:pl-8"> {# Añadido borde izquierdo y padding para separación #}
+                    <h3 class="text-xl font-semibold mb-4 text-gray-700">Datos del Comodato</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="form-group">
+                            <label for="motivoPrestamo" class="block text-gray-700 text-sm font-bold mb-2">Motivo Préstamo (*)</label>
+                            <input type="text" name="motivoPrestamo" id="motivoPrestamo" value="{{ form.motivoPrestamo if form.motivoPrestamo else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="otroMotivo" class="block text-gray-700 text-sm font-bold mb-2">Otro Motivo</label>
+                            <input type="text" name="otroMotivo" id="otroMotivo" value="{{ form.otroMotivo if form.otroMotivo else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div class="form-group">
+                            <label for="fechaDevolucion" class="block text-gray-700 text-sm font-bold mb-2">Fecha Devolución (*)</label>
+                            <input type="date" name="fechaDevolucion" id="fechaDevolucion" value="{{ form.fechaDevolucion if form.fechaDevolucion else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="folioSustitucion" class="block text-gray-700 text-sm font-bold mb-2">Folio Sustitución</label>
+                            <input type="text" name="folioSustitucion" id="folioSustitucion" value="{{ form.folioSustitucion if form.folioSustitucion else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div class="form-group">
+                            <label for="cantidad" class="block text-gray-700 text-sm font-bold mb-2">Cantidad (*)</label>
+                            <input type="number" name="cantidad" id="cantidad" value="{{ form.cantidad if form.cantidad else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="UM" class="block text-gray-700 text-sm font-bold mb-2">UM</label>
+                            <input type="text" name="UM" id="UM" value="{{ form.UM if form.UM else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div class="form-group">
+                            <label for="concepto" class="block text-gray-700 text-sm font-bold mb-2">Concepto (*)</label>
+                            <input type="text" name="concepto" id="concepto" value="{{ form.concepto if form.concepto else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="costo" class="block text-gray-700 text-sm font-bold mb-2">Costo</label>
+                            <input type="number" step="0.01" name="costo" id="costo" value="{{ form.costo if form.costo else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div class="form-group">
+                            <label for="importe" class="block text-gray-700 text-sm font-bold mb-2">Importe</label>
+                            <input type="number" step="0.01" name="importe" id="importe" value="{{ form.importe if form.importe else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div class="form-group">
+                            <label for="importeTotal" class="block text-gray-700 text-sm font-bold mb-2">Importe Total (*)</label>
+                            <input type="number" step="0.01" name="importeTotal" id="importeTotal" value="{{ form.importeTotal if form.importeTotal else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-center mt-8 space-x-4">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:shadow-outline shadow-md">
+                    Agregar Comodato
+                </button>
+                <a href="{{ url_for('comodatos.listar_comodatos') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:shadow-outline text-center shadow-md">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <footer class="app-footer">
+        <p>&copy; {{ now().year }} Jubileo Azul S.A. de C.V. Todos los derechos reservados.</p>
+        <p>Contacto: <a href="mailto:plantajubileo@prodigy.net.mx">plantajubileo@prodigy.net.mx</a> | Tel: (773) 785 1962</p>
+        <p>Dirección: AV. CRUZ AZUL S/N COL. CENTRO, CD. COOPERATIVA CRUZ AZUL, TULA DE ALLENDE, HGO. C.P. 42840</p>
+    </footer>
+</body>
+</html>

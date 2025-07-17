@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lista de Clientes</title>
+</head>
+<body>
+    <h1>Lista de Clientes</h1>
+    <p><a href="{{ url_for('clientes.agregar_cliente') }}">Agregar Nuevo Cliente</a></p>
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    <table>
+        <thead>
+            <tr>
+                <th>No. Folio</th>
+                <th>Nombre Comercial</th>
+                <th>Tipo de Cliente</th>
+                <th>No. Cliente</th>
+                <th>Fecha de Préstamo</th>
+                <th>Ruta</th>
+                <th>Teléfono</th>
+                <th>Calle</th>
+                <th>Número</th>
+                <th>Colonia</th>
+                <th>Municipio</th>
+                <th>Estado</th>
+                <th>Código Postal</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cliente in clientes %}
+            <tr>
+                <td>{{ cliente.NoFolio }}</td>
+                <td>{{ cliente.nombreComercial }}</td>
+                <td>{{ cliente.tipoCliente }}</td>
+                <td>{{ cliente.NoCliente }}</td>
+                <td>{{ cliente.fechaPrestamo }}</td>
+                <td>{{ cliente.ruta }}</td>
+                <td>{{ cliente.telefono }}</td>
+                <td>{{ cliente.calle }}</td>
+                <td>{{ cliente.numero }}</td>
+                <td>{{ cliente.colonia }}</td>
+                <td>{{ cliente.municipio }}</td>
+                <td>{{ cliente.estado }}</td>
+                <td>{{ cliente.cp }}</td>
+                <td>
+                    <a href="{{ url_for('clientes.editar_cliente', NoFolio=cliente.NoFolio) }}">Editar</a>
+                    <form method="POST" action="{{ url_for('clientes.eliminar_cliente', NoFolio=cliente.NoFolio) }}" style="display: inline;">
+                        <button type="submit" onclick="return confirm('¿Estás seguro de que deseas eliminar este cliente?')">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

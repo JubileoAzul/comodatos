@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Jubileo Azul</title>
+    <!-- Incluir Tailwind CSS desde CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}" type="image/png">
+    <style>
+        /* Estilos personalizados para mensajes flash */
+        .flashes {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.25rem;
+        }
+        .flashes.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .flashes.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .flashes.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* --- NUEVOS ESTILOS --- */
+        body {
+            background: linear-gradient(to bottom right, #e0f2f7, #bbdefb); /* Degradado de azul */
+            font-family: 'Inter', sans-serif; /* Usar Inter como fuente */
+            min-height: 100vh; /* Asegura que el degradado cubra toda la altura */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content {
+            flex-grow: 1; /* Permite que el contenido principal ocupe el espacio disponible */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem; /* Pequeño padding para el contenido principal */
+        }
+
+        /* Estilo para el encabezado de la página */
+        .page-header {
+            background-color: #003366; /* Azul oscuro para el fondo del encabezado */
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Centrar el contenido del encabezado */
+            border-bottom-left-radius: 1rem;
+            border-bottom-right-radius: 1rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-header .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .page-header .logo {
+            max-width: 13rem; /* Tamaño del logo */
+            height: auto;
+            border-radius: 0.5rem; /* Bordes redondeados para el logo */
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem; /* Título más grande */
+            font-weight: 800; /* Extra bold */
+            color: #e3f2fd; /* Azul muy claro para el título */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Sombra para resaltar */
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Estilo para el formulario de login */
+        .login-form-container {
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 1rem; /* Bordes más redondeados */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Sombra más pronunciada */
+            width: 100%;
+            max-width: 400px; /* Ancho máximo para el formulario */
+        }
+
+        /* Estilo para el footer */
+        .app-footer {
+            background-color: #003366; /* Azul oscuro, igual que el encabezado */
+            color: white;
+            padding: 1rem 2rem;
+            text-align: center;
+            font-size: 0.9rem;
+            border-top-left-radius: 1rem;
+            border-top-right-radius: 1rem;
+            margin-top: 2rem; /* Margen superior para separarlo del contenido */
+            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .app-footer p {
+            margin: 0.5rem 0;
+        }
+        .app-footer a {
+            color: #a7d9f8; /* Un azul más claro para enlaces en el footer */
+            text-decoration: none;
+        }
+        .app-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans leading-normal tracking-normal">
+    <header class="page-header">
+        <div class="logo-container">
+            <!-- Reemplaza esta URL con la ruta a tu logo real -->
+            <img src="/static/images/logo2.png" alt="Logo Jubileo Azul" class="logo">
+            <h1>Jubileo Azul</h1>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <div class="login-form-container">
+            <h2 class="text-2xl font-bold text-center mb-6 text-gray-800">Iniciar Sesión</h2>
+
+            {% for message in get_flashed_messages(with_categories=true) %}
+                <div class="flashes {{ message[0] }} p-3 mb-3 rounded">
+                    {{ message[1] }}
+                </div>
+            {% endfor %}
+
+            <form method="POST" action="{{ url_for('auth.login') }}">
+                <div class="mb-4">
+                    <label for="username" class="block text-gray-700 text-sm font-bold mb-2">Usuario:</label>
+                    <input type="text" name="username" id="username" required
+                           class="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div class="mb-6">
+                    <label for="password" class="block text-gray-700 text-sm font-bold mb-2">Contraseña:</label>
+                    <input type="password" name="password" id="password" required
+                           class="shadow appearance-none border rounded-md w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div class="flex items-center justify-between">
+                    <button type="submit"
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:shadow-outline w-full shadow-md">
+                        Entrar
+                    </button>
+                </div>
+                
+            </form>
+        </div>
+    </div>
+
+    <footer class="app-footer">
+        <p>&copy; {{ now().year }} Jubileo Azul S.A. de C.V. Todos los derechos reservados.</p>
+        <p>Contacto: <a href="mailto:plantajubileo@prodigy.net.mx">plantajubileo@prodigy.net.mx</a> | Tel: (773) 785 1962</p>
+        <p>Dirección: AV. CRUZ AZUL S/N COL. CENTRO, CD. COOPERATIVA CRUZ AZUL, TULA DE ALLENDE, HGO. C.P. 42840</p>
+    </footer>
+</body>
+</html>

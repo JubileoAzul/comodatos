@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Editar Cliente</title>
+</head>
+<body>
+    <h1>Editar Cliente</h1>
+    <p><a href="{{ url_for('clientes.listar_clientes') }}">Volver a la lista de clientes</a></p>
+
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    {% if cliente %}
+        <form method="POST" action="{{ url_for('clientes.editar_cliente', NoFolio=cliente.NoFolio) }}">
+            <div>
+                <label for="NoFolio">No. Folio:</label>
+                <input type="text" id="NoFolio" name="NoFolio" value="{{ cliente.NoFolio }}" readonly>
+            </div>
+            <div>
+                <label for="nombreComercial">Nombre Comercial:</label>
+                <input type="text" id="nombreComercial" name="nombreComercial" value="{{ cliente.nombreComercial }}" required>
+            </div>
+            <div>
+                <label for="tipoCliente">Tipo de Cliente:</label>
+                <input type="text" id="tipoCliente" name="tipoCliente" value="{{ cliente.tipoCliente }}" required>
+            </div>
+            <div>
+                <label for="NoCliente">No. Cliente:</label>
+                <input type="text" id="NoCliente" name="NoCliente" value="{{ cliente.NoCliente }}">
+            </div>
+
+            <div>
+                <label for="fechaPrestamo">Fecha de Préstamo:</label>
+                <input type="date" id="fechaPrestamo" name="fechaPrestamo" value="{{ cliente.fechaPrestamo }}">
+            </div>
+            <div>
+                <label for="ruta">Ruta:</label>
+                <input type="text" id="ruta" name="ruta" value="{{ cliente.ruta }}">
+            </div>
+            <div>
+                <label for="telefono">Teléfono:</label>
+                <input type="tel" id="telefono" name="telefono" value="{{ cliente.telefono }}">
+            </div>
+            <div>
+                <label for="calle">Calle:</label>
+                <input type="text" id="calle" name="calle" value="{{ cliente.calle }}">
+            </div>
+            <div>
+                <label for="numero">Número:</label>
+                <input type="text" id="numero" name="numero" value="{{ cliente.numero }}">
+            </div>
+            <div>
+                <label for="colonia">Colonia:</label>
+                <input type="text" id="colonia" name="colonia" value="{{ cliente.colonia }}">
+            </div>
+            <div>
+                <label for="municipio">Municipio:</label>
+                <input type="text" id="municipio" name="municipio" value="{{ cliente.municipio }}">
+            </div>
+            <div>
+                <label for="estado">Estado:</label>
+                <input type="text" id="estado" name="estado" value="{{ cliente.estado }}">
+            </div>
+            <div>
+                <label for="cp">Código Postal:</label>
+                <input type="text" id="cp" name="cp" value="{{ cliente.cp }}">
+            </div>
+
+            <button type="submit">Guardar Cambios</button>
+        </form>
+    {% else %}
+        <p>No se encontró el cliente.</p>
+    {% endif %}
+</body>
+</html>
