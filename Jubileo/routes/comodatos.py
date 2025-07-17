@@ -14,84 +14,11 @@ from models.condicion_comodato import CondicionesComodato
 from models.usuario import Usuario 
 
 from utils.error_handler import enviar_correo_error
+# Importa la función auxiliar desde el nuevo archivo
+# Asegúrate de que utils/pdf_helpers.py exista y contenga _agregar_articulos_comodato
+from utils.pdf_helpers import _agregar_articulos_comodato 
 
 logger = logging.getLogger(__name__)
-
-# --- Función auxiliar para agregar artículos idénticos ---
-def _agregar_articulos_comodato(items):
-    """
-    Agrupa y suma los artículos de comodato que tienen el mismo concepto y unidad de medida.
-    Retorna una lista de diccionarios con los artículos agregados, asegurando que los valores numéricos
-    sean tratados como floats para la suma. Maneja la limpieza de caracteres no numéricos.
-    """
-    agregados = defaultdict(lambda: {
-        'cantidad': 0,
-        'UM': '', 
-        'concepto': '',
-        'costo': 0.0, 
-        'importe': 0.0,
-        'importeTotal': 0.0 
-    })
-
-    for item in items:
-        key = (item.concepto, item.UM)
-        
-        logger.debug(f"DEBUG_AGGREGATION: Processing item: Concepto='{item.concepto}', Cantidad={item.cantidad}, UM='{item.UM}', Costo={item.costo}, Importe={item.importe}, ImporteTotal={item.importeTotal}")
-
-        cantidad_val = int(item.cantidad) if item.cantidad is not None else 0
-        
-        costo_val = 0.0
-        importe_val = 0.0
-        importe_total_val = 0.0
-
-        # Intenta convertir 'costo' a float, limpiando caracteres no numéricos
-        if item.costo is not None:
-            try:
-                # Elimina caracteres comunes no numéricos como '$' y ',' antes de la conversión
-                cleaned_costo_str = str(item.costo).replace('$', '').replace(',', '')
-                costo_val = float(cleaned_costo_str)
-            except (ValueError, TypeError):
-                logger.error(f"ERROR_AGGREGATION: Could not convert costo '{item.costo}' to float for Concepto='{item.concepto}'. Defaulting to 0.0.")
-                costo_val = 0.0
-        
-        # Intenta convertir 'importe' a float, limpiando caracteres no numéricos
-        if item.importe is not None:
-            try:
-                cleaned_importe_str = str(item.importe).replace('$', '').replace(',', '')
-                importe_val = float(cleaned_importe_str)
-            except (ValueError, TypeError):
-                logger.error(f"ERROR_AGGREGATION: Could not convert importe '{item.importe}' to float for Concepto='{item.concepto}'. Defaulting to 0.0.")
-                importe_val = 0.0
-
-        # Intenta convertir 'importeTotal' a float, limpiando caracteres no numéricos
-        if item.importeTotal is not None:
-            try:
-                cleaned_importe_total_str = str(item.importeTotal).replace('$', '').replace(',', '')
-                importe_total_val = float(cleaned_importe_total_str)
-            except (ValueError, TypeError):
-                logger.error(f"ERROR_AGGREGATION: Could not convert importeTotal '{item.importeTotal}' to float for Concepto='{item.concepto}'. Defaulting to 0.0.")
-                importe_total_val = 0.0
-
-        logger.debug(f"DEBUG_AGGREGATION: Converted values: Cantidad={cantidad_val}, Costo={costo_val}, Importe={importe_val}, ImporteTotal={importe_total_val}")
-
-
-        agregados[key]['cantidad'] += cantidad_val
-        agregados[key]['UM'] = item.UM if item.UM else 'N/A'
-        agregados[key]['concepto'] = item.concepto if item.concepto else 'N/A'
-
-        # Asignar el costo unitario del primer artículo encontrado para este grupo, si aún no está asignado
-        if agregados[key]['costo'] == 0.0 and costo_val != 0.0: # Solo actualiza si el costo agregado es 0 y el costo_val es válido
-             agregados[key]['costo'] = costo_val
-
-        agregados[key]['importe'] += importe_val
-        agregados[key]['importeTotal'] += importe_total_val
-        
-        logger.debug(f"DEBUG_AGGREGATION: After adding to aggregated[{key}]: Current Importe for key='{key}' is {agregados[key]['importe']:.2f}, Current ImporteTotal for key='{key}' is {agregados[key]['importeTotal']:.2f}")
-    
-    final_aggregated_list = list(agregados.values())
-    logger.debug(f"DEBUG_AGGREGATION: Final aggregated list before return: {final_aggregated_list}")
-    return final_aggregated_list
-
 
 comodatos_bp = Blueprint('comodatos', __name__, url_prefix='/comodatos')
 
@@ -122,7 +49,6 @@ def listar_comodatos():
         )
 
         # Determinar si se están aplicando filtros
-        # Se considera que hay filtros si cualquiera de los campos de búsqueda tiene un valor
         applying_filters = bool(search_query or fecha_prestamo_search_str or fecha_devolucion_search_str)
 
         # Aplicar filtros condicionalmente
@@ -467,7 +393,8 @@ def editar_comodato(idComodato):
     return render_template(
         'comodatos/editar.html',
         comodato=comodato,
-        cliente=cliente
+        cliente=cliente,
+        form={} 
     )
 
 
@@ -478,15 +405,19 @@ def eliminar_comodato(idComodato):
     """
     Ruta para eliminar un comodato existente.
     """
+    logger.info(f"Intento de eliminación para comodato ID: {idComodato}")
     try:
         comodato = CondicionesComodato.query.get_or_404(idComodato)
+        logger.info(f"Comodato encontrado para eliminación: {comodato.idComodato}")
         db.session.delete(comodato)
+        logger.info(f"Comodato {comodato.idComodato} marcado para eliminación. Intentando commit...")
         db.session.commit()
+        logger.info(f"Comodato {idComodato} eliminado exitosamente y cambios confirmados en la DB.")
         flash('Comodato eliminado exitosamente.', 'success')
     except Exception as e:
         db.session.rollback()
         error_msg = f"Error al eliminar comodato ID {idComodato}: {e}"
-        logger.error(error_msg, exc_info=True)
+        logger.error(error_msg, exc_info=True) # Asegura que la traza completa se registre
         enviar_correo_error(
             asunto="Error en Sistema de Comodatos: Eliminar Comodato",
             cuerpo=f"Ha ocurrido un error inesperado al intentar eliminar el comodato con ID: {idComodato}.\n\nDetalles del error: {error_msg}"
