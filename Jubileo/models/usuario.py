@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash # Para
 print(f"DEBUG: Cargando models.py desde: {__file__}") # <--- ¡AÑADE ESTA LÍNEA!
 
 class Usuario(UserMixin, db.Model): # ¡IMPORTANTE! Heredar de UserMixin
-    __tablename__ = 'usuarios' # Nombre de la tabla en la base de datos
+    __tablename__ = 'usuario' # Nombre de la tabla en la base de datos
     idUsuario = db.Column(db.Integer, primary_key=True) # ID del usuario
     nombreUsuario = db.Column(db.String(255), unique=True, nullable=False) # Nombre de usuario único
     contraseña = db.Column(db.String(255), nullable=False) # Almacena la contraseña hasheada
