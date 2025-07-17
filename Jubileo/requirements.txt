@@ -1,6 +1,8 @@
 Flask
-Flask-MySQLdb
-bcrypt
-Flask-Mail
 Flask-SQLAlchemy
+Flask-Mail
 Flask-APScheduler
+Flask-Login
+PyMySQL
+bcrypt
+WeasyPrint
