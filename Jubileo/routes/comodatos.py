@@ -1,5 +1,3 @@
-# C:\Jubileo\routes\comodatos.py
-
 import io
 import logging
 from datetime import datetime, timedelta 
@@ -115,16 +113,16 @@ def listar_comodatos():
     fecha_prestamo_search_str = request.args.get('fecha_prestamo_search', '').strip()
     fecha_devolucion_search_str = request.args.get('fecha_devolucion_search', '').strip()
 
-    logger.debug(f"DEBUG_FILTER_INPUT: search_query='{search_query}', fecha_prestamo_search_str='{fecha_prestamo_search_str}', fecha_devolucion_search_str='{fecha_devolucion_search_str}')")
+    logger.debug(f"DEBUG_FILTER_INPUT: search_query='{search_query}', fecha_prestamo_search_str='{fecha_prestamo_search_str}', fecha_devolucion_search_str='{fecha_devolucion_search_str}'")
 
     try:
         # Construir la consulta base
-        # CAMBIO CLAVE: Usar outerjoin para incluir todos los comodatos, incluso sin cliente asociado
-        query = db.session.query(CondicionesComodato, Cliente).outerjoin(
+        query = db.session.query(CondicionesComodato, Cliente).join(
             Cliente, CondicionesComodato.NoFolio == Cliente.NoFolio
         )
 
         # Determinar si se están aplicando filtros
+        # Se considera que hay filtros si cualquiera de los campos de búsqueda tiene un valor
         applying_filters = bool(search_query or fecha_prestamo_search_str or fecha_devolucion_search_str)
 
         # Aplicar filtros condicionalmente
@@ -132,29 +130,31 @@ def listar_comodatos():
             search_pattern = f"%{search_query}%"
             query = query.filter(
                 or_(
-                    # Acceder a atributos de Cliente solo si cliente_rec no es None
-                    Cliente.nombreComercial.ilike(search_pattern) if Cliente.nombreComercial is not None else False,
-                    Cliente.telefono.ilike(search_pattern) if Cliente.telefono is not None else False,
-                    Cliente.email.ilike(search_pattern) if Cliente.email is not None else False,
-                    Cliente.calle.ilike(search_pattern) if Cliente.calle is not None else False,
-                    Cliente.colonia.ilike(search_pattern) if Cliente.colonia is not None else False,
-                    Cliente.municipio.ilike(search_pattern) if Cliente.municipio is not None else False,
-                    Cliente.estado.ilike(search_pattern) if Cliente.estado is not None else False,
-                    Cliente.cp.ilike(search_pattern) if Cliente.cp is not None else False,
+                    Cliente.nombreComercial.ilike(search_pattern),
+                    Cliente.telefono.ilike(search_pattern),
+                    Cliente.email.ilike(search_pattern),
+                    Cliente.calle.ilike(search_pattern),
+                    Cliente.colonia.ilike(search_pattern),
+                    Cliente.municipio.ilike(search_pattern),
+                    Cliente.estado.ilike(search_pattern),
+                    Cliente.cp.ilike(search_pattern),
                     CondicionesComodato.concepto.ilike(search_pattern),
-                    CondicionesComodato.motivoPrestamo.ilike(search_pattern) if CondicionesComodato.motivoPrestamo is not None else False,
-                    CondicionesComodato.otroMotivo.ilike(search_pattern) if CondicionesComodato.otroMotivo is not None else False,
-                    CondicionesComodato.folioSustitucion.ilike(search_pattern) if CondicionesComodato.folioSustitucion is not None else False,
+                    CondicionesComodato.motivoPrestamo.ilike(search_pattern),
+                    CondicionesComodato.otroMotivo.ilike(search_pattern),
+                    CondicionesComodato.folioSustitucion.ilike(search_pattern),
                     func.cast(CondicionesComodato.idComodato, db.String).ilike(search_pattern),
-                    func.cast(Cliente.NoFolio, db.String).ilike(search_pattern) if Cliente.NoFolio is not None else False,
-                    func.cast(Cliente.NoCliente, db.String).ilike(search_pattern) if Cliente.NoCliente is not None else False
+                    func.cast(Cliente.NoFolio, db.String).ilike(search_pattern),
+                    func.cast(Cliente.NoCliente, db.String).ilike(search_pattern) # Filtrar por NoCliente
                 )
             )
 
         if fecha_prestamo_search_str:
             try:
+                # Filtra para fechas exactamente iguales a la fecha seleccionada
                 fecha_prestamo_search = datetime.strptime(fecha_prestamo_search_str, '%Y-%m-%d').date()
+                logger.debug(f"DEBUG_FILTER_PARSE: Parsed fecha_prestamo_search: {fecha_prestamo_search} (Type: {type(fecha_prestamo_search)})")
                 query = query.filter(Cliente.fechaPrestamo == fecha_prestamo_search) 
+                logger.debug(f"DEBUG_FILTER_APPLY: Applied fechaPrestamo filter: == {fecha_prestamo_search}")
             except ValueError:
                 flash("Formato de Fecha de Préstamo inválido. Usa: AAAA-MM-DD.", 'error')
                 logger.warning(f"DEBUG_FILTER_ERROR: Invalid Fecha de Préstamo format: {fecha_prestamo_search_str}")
@@ -162,52 +162,49 @@ def listar_comodatos():
 
         if fecha_devolucion_search_str:
             try:
+                # Filtra para fechas exactamente iguales a la fecha seleccionada
                 fecha_devolucion_search = datetime.strptime(fecha_devolucion_search_str, '%Y-%m-%d').date()
+                logger.debug(f"DEBUG_FILTER_PARSE: Parsed fecha_devolucion_search: {fecha_devolucion_search} (Type: {type(fecha_devolucion_search)})")
                 query = query.filter(CondicionesComodato.fechaDevolucion == fecha_devolucion_search) 
+                logger.debug(f"DEBUG_FILTER_APPLY: Applied fechaDevolucion filter: == {fecha_devolucion_search}")
             except ValueError:
                 flash("Formato de Fecha de Devolución inválido. Usa: AAAA-MM-DD.", 'error')
                 logger.warning(f"DEBUG_FILTER_ERROR: Invalid Fecha de Devolución format: {fecha_devolucion_search_str}")
 
-        # Si NO se están aplicando filtros, NO aplicamos limit ni order_by para ver todos los datos.
-        # Si SÍ se están aplicando filtros, se muestra todo lo que coincida.
+        # Aplicar orden y límite solo si NO se están aplicando filtros
         if not applying_filters:
-            logger.info("DEBUG_INITIAL_LOAD: Mostrando TODOS los comodatos (sin límite inicial, ordenados por ID descendente).")
-            # Añadir una ordenación por defecto si no hay filtros para una visualización consistente
-            query = query.order_by(CondicionesComodato.idComodato.desc())
+            query = query.order_by(CondicionesComodato.idComodato.desc()).limit(10)
+            logger.info("DEBUG_INITIAL_LOAD: Mostrando los 10 comodatos más recientes.")
         else:
             logger.info("DEBUG_FILTERED_LOAD: Mostrando todos los comodatos que coinciden con los filtros.")
-            # Si hay filtros, puedes añadir una ordenación por defecto si lo deseas, por ejemplo:
-            query = query.order_by(CondicionesComodato.idComodato.desc())
-
 
         comodatos_con_clientes = query.all()
 
-        logger.info(f"DEBUG_QUERY_RESULTS: Resultados crudos de la consulta: {comodatos_con_clientes}")
         logger.info(f"Se encontraron {len(comodatos_con_clientes)} comodatos después de filtrar.")
 
         lista_comodatos = []
         for comodato_rec, cliente_rec in comodatos_con_clientes: 
-            logger.debug(f"DEBUG_RESULT_ITEM: Comodato ID: {comodato_rec.idComodato}, Cliente Fecha Préstamo (DB): {cliente_rec.fechaPrestamo if cliente_rec else 'N/A'} (Type: {type(cliente_rec.fechaPrestamo) if cliente_rec else 'NoneType'}), Comodato Fecha Devolución (DB): {type(comodato_rec.fechaDevolucion)} - Valor: {comodato_rec.fechaDevolucion}")
-            
-            # Manejar el caso donde cliente_rec es None (cuando no hay un cliente asociado)
+            logger.debug(f"DEBUG_RESULT_ITEM: Comodato ID: {comodato_rec.idComodato}, Cliente Fecha Préstamo (DB): {cliente_rec.fechaPrestamo} (Type: {type(cliente_rec.fechaPrestamo)}), Comodato Fecha Devolución (DB): {comodato_rec.fechaDevolucion} (Type: {type(comodato_rec.fechaDevolucion)})")
             lista_comodatos.append({
                 'idComodato': comodato_rec.idComodato,
-                'NoFolioCliente': cliente_rec.NoFolio if cliente_rec else 'N/A',
-                'NoCliente': cliente_rec.NoCliente if cliente_rec else 'N/A', 
-                'nombreComercialCliente': cliente_rec.nombreComercial if cliente_rec else 'N/A',
-                'tipoCliente': cliente_rec.tipoCliente if cliente_rec else 'N/A',
-                'fechaPrestamo': cliente_rec.fechaPrestamo.strftime('%d/%m/%Y') if cliente_rec and cliente_rec.fechaPrestamo else 'N/A', 
-                'ruta': cliente_rec.ruta if cliente_rec else 'N/A',
-                'telefono': cliente_rec.telefono if cliente_rec else 'N/A',
-                'email': cliente_rec.email if cliente_rec else 'N/A', 
-                'calle': cliente_rec.calle if cliente_rec else 'N/A',
-                'numero': cliente_rec.numero if cliente_rec else 'N/A',
-                'colonia': cliente_rec.colonia if cliente_rec else 'N/A',
-                'municipio': cliente_rec.municipio if cliente_rec else 'N/A',
-                'estado': cliente_rec.estado if cliente_rec else 'N/A', 
-                'cp': cliente_rec.cp if cliente_rec else 'N/A',
+                'NoFolioCliente': cliente_rec.NoFolio,
+                'NoCliente': cliente_rec.NoCliente, # Incluir NoCliente en la lista
+                'nombreComercialCliente': cliente_rec.nombreComercial,
+                'tipoCliente': cliente_rec.tipoCliente,
+                # Formatear la fecha para la visualización en la tabla (DD/MM/YYYY)
+                'fechaPrestamo': cliente_rec.fechaPrestamo.strftime('%d/%m/%Y') if cliente_rec.fechaPrestamo else 'N/A', 
+                'ruta': cliente_rec.ruta if cliente_rec.ruta else 'N/A',
+                'telefono': cliente_rec.telefono if cliente_rec.telefono else 'N/A',
+                'email': cliente_rec.email if cliente_rec.email else 'N/A', 
+                'calle': cliente_rec.calle if cliente_rec.calle else 'N/A',
+                'numero': cliente_rec.numero if cliente_rec.numero else 'N/A',
+                'colonia': cliente_rec.colonia if cliente_rec.colonia else 'N/A',
+                'municipio': cliente_rec.municipio if cliente_rec.municipio else 'N/A',
+                'estado': cliente_rec.estado if cliente_rec.estado else 'N/A', 
+                'cp': cliente_rec.cp if cliente_rec.cp else 'N/A',
                 'motivoPrestamo': comodato_rec.motivoPrestamo if comodato_rec.motivoPrestamo else 'N/A',
                 'otroMotivo': comodato_rec.otroMotivo if comodato_rec.otroMotivo else 'N/A',
+                # Formatear la fecha para la visualización en la tabla (DD/MM/YYYY)
                 'fechaDevolucion': comodato_rec.fechaDevolucion.strftime('%d/%m/%Y') if comodato_rec.fechaDevolucion else 'N/A', 
                 'folioSustitucion': comodato_rec.folioSustitucion if comodato_rec.folioSustitucion else 'N/A',
                 'cantidad': comodato_rec.cantidad if comodato_rec.cantidad is not None else 'N/A',
@@ -222,8 +219,8 @@ def listar_comodatos():
             'comodatos/listar.html', 
             comodatos=lista_comodatos,
             search_query=search_query,
-            fecha_prestamo_search=fecha_prestamo_search_str, 
-            fecha_devolucion_search=fecha_devolucion_search_str 
+            fecha_prestamo_search=fecha_prestamo_search_str, # Pasar la cadena original para pre-llenar el input type="date"
+            fecha_devolucion_search=fecha_devolucion_search_str # Pasar la cadena original para pre-llenar el input type="date"
         )
 
     except Exception as e:
@@ -246,6 +243,10 @@ def agregar_comodato():
     Maneja tanto la visualización del formulario (GET) como el procesamiento (POST).
     """
     if request.method == 'POST':
+        # --- INICIALIZACIÓN DE VARIABLES PARA EVITAR EL ERROR 'UNBOUNDLOCALERROR' ---
+        no_folio_cliente = None 
+        cliente = None
+        # -------------------------------------------------------------------------
         try:
             # Obtener datos del formulario para Cliente
             no_folio_cliente_str = request.form.get('NoFolio')
@@ -253,8 +254,7 @@ def agregar_comodato():
                 raise ValueError("El campo 'No. Folio Cliente' es requerido.")
             no_folio_cliente = int(no_folio_cliente_str) 
 
-            # AÑADIDO: Capturar NoCliente del formulario
-            no_cliente_from_form = request.form.get('NoCliente') 
+            no_cliente_from_form = request.form.get('NoCliente') # OBTENER EL NUEVO CAMPO NoCliente
 
             nombre_comercial = request.form.get('nombreComercial')
             if not nombre_comercial:
@@ -308,13 +308,9 @@ def agregar_comodato():
             
             fecha_devolucion = datetime.strptime(fecha_devolucion_str, '%Y-%m-%d').date()
 
-            # --- INICIO DEPURACIÓN ADICIONAL Y CAMBIO A filter_by ---
-            logger.debug(f"DEBUG_ADD_CLIENT_CHECK: Buscando cliente con NoFolio: {no_folio_cliente} (tipo: {type(no_folio_cliente)})")
-            # CAMBIO: Usar filter_by().first() en lugar de get() para mayor robustez, aunque get() es válido para PK.
-            cliente_existente = Cliente.query.filter_by(NoFolio=no_folio_cliente).first()
-            
+            # Verificar si el cliente ya existe por su NoFolio
+            cliente_existente = Cliente.query.get(no_folio_cliente)
             if cliente_existente:
-                logger.debug(f"DEBUG_ADD_CLIENT_CHECK: Cliente existente encontrado: {cliente_existente.nombreComercial} (NoFolio: {cliente_existente.NoFolio}). Actualizando datos.")
                 flash(f'El cliente con No. Folio {no_folio_cliente} ya existe. Se asociará el comodato a este cliente y se actualizarán sus datos.', 'info')
                 cliente = cliente_existente
                 # Actualizar los datos del cliente existente
@@ -330,14 +326,12 @@ def agregar_comodato():
                 cliente.estado = estado
                 cliente.cp = cp
                 cliente.fechaPrestamo = fecha_prestamo_cliente
-                cliente.NoCliente = no_cliente_from_form # AÑADIDO: Actualizar NoCliente
-                logger.debug(f"DEBUG_ADD_CLIENT_CHECK: Datos del cliente existente actualizados en la sesión.")
+                cliente.NoCliente = no_cliente_from_form # ACTUALIZAR NoCliente para cliente existente
             else:
-                logger.debug(f"DEBUG_ADD_CLIENT_CHECK: Cliente con NoFolio {no_folio_cliente} NO encontrado. Creando nuevo cliente.")
                 # Si el cliente no existe, crear uno nuevo
                 nuevo_cliente = Cliente(
                     NoFolio=no_folio_cliente,
-                    NoCliente=no_cliente_from_form, # AÑADIDO: Asignar NoCliente
+                    NoCliente=no_cliente_from_form, # ASIGNAR NoCliente para nuevo cliente
                     nombreComercial=nombre_comercial,
                     tipoCliente=tipo_cliente,
                     fechaPrestamo=fecha_prestamo_cliente,
@@ -352,11 +346,7 @@ def agregar_comodato():
                     cp=cp
                 )
                 db.session.add(nuevo_cliente)
-                logger.debug(f"DEBUG_ADD_CLIENT_CHECK: Nuevo cliente añadido a la sesión. Intentando flush para asegurar su existencia en DB.")
-                db.session.flush() # AÑADIDO: Flush para asegurar que el nuevo cliente exista en la DB antes del comodato
-                logger.debug(f"DEBUG_ADD_CLIENT_CHECK: Flush completado para nuevo cliente NoFolio: {nuevo_cliente.NoFolio}. Cliente objeto: {cliente}.")
                 cliente = nuevo_cliente
-            # --- FIN DEPURACIÓN ADICIONAL ---
 
             # Crear nuevo comodato, relacionándolo con el cliente
             nuevo_comodato = CondicionesComodato( 
@@ -374,9 +364,7 @@ def agregar_comodato():
             )
             logger.debug(f"DEBUG_ADD: Motivo de Préstamo a guardar en la DB: '{nuevo_comodato.motivoPrestamo}'") 
             db.session.add(nuevo_comodato)
-            logger.debug(f"DEBUG_ADD: Comodato añadido a la sesión. Intentando commit para guardar ambos.")
             db.session.commit()
-            logger.debug(f"DEBUG_ADD: Commit completado. Comodato y cliente guardados exitosamente.")
             flash('Comodato agregado exitosamente.', 'success')
             return redirect(url_for('comodatos.listar_comodatos'))
 
@@ -426,7 +414,7 @@ def editar_comodato(idComodato):
             cliente.municipio = request.form.get('municipio')
             cliente.estado = request.form.get('estado')
             cliente.cp = request.form.get('cp')
-            cliente.NoCliente = request.form.get('NoCliente') # AÑADIDO: Actualizar NoCliente
+            cliente.NoCliente = request.form.get('NoCliente') # ACTUALIZAR NoCliente para cliente existente
             
             fecha_prestamo_cliente_str = request.form.get('fechaPrestamo')
             if fecha_prestamo_cliente_str:
@@ -479,8 +467,7 @@ def editar_comodato(idComodato):
     return render_template(
         'comodatos/editar.html',
         comodato=comodato,
-        cliente=cliente,
-        form={} 
+        cliente=cliente
     )
 
 
@@ -522,9 +509,11 @@ def renovar_comodato(idComodato):
 
         if comodato.fechaDevolucion:
             # Adelantar la fecha de devolución un año
+            # Manejo de años bisiestos: si es 29 de febrero, irá al 28 de febrero del siguiente año
             try:
                 comodato.fechaDevolucion = comodato.fechaDevolucion.replace(year=comodato.fechaDevolucion.year + 1)
             except ValueError:
+                # Si es 29 de febrero y el siguiente año no es bisiesto, ajusta al 28 de febrero
                 comodato.fechaDevolucion = comodato.fechaDevolucion.replace(month=2, day=28, year=comodato.fechaDevolucion.year + 1)
             
             # Resetea el flag de notificación
@@ -541,7 +530,7 @@ def renovar_comodato(idComodato):
         logger.error(error_msg, exc_info=True)
         enviar_correo_error(
             asunto="Error en Sistema de Comodatos: Renovar Comodato",
-            cuerpo=f"Ha ocurrido un error inesperado al intentar renovar el comodato con ID: {idComodato}.\n\nDetalles del error: {e}"
+            cuerpo=f"Ha ocurrido un error inesperado al intentar renovar el comodato con ID: {idComodato}.\n\nDetalles del error: {error_msg}"
         )
         flash(f'Ocurrió un error al renovar el comodato: {e}', 'error')
     
@@ -569,14 +558,7 @@ def generar_nota_comodato(idComodato):
         fecha_devolucion_grupo = main_comodato.fechaDevolucion
 
         # 2. Obtener el cliente asociado
-        cliente = Cliente.query.filter_by(NoFolio=no_folio).first()
-        
-        # Si el cliente no existe, flash un error y redirigir
-        if not cliente:
-            flash(f'No se encontró el cliente con No. Folio {no_folio} para generar la nota de comodato.', 'error')
-            logger.warning(f"Intento de generar nota agrupada para comodato {idComodato}: Cliente con NoFolio {no_folio} no encontrado.")
-            return redirect(url_for('comodatos.listar_comodatos'))
-
+        cliente = Cliente.query.get_or_404(no_folio)
 
         # 3. Obtener TODOS los comodatos de ese cliente con la MISMA fecha de devolución
         raw_comodato_items = CondicionesComodato.query.filter_by(
@@ -590,7 +572,7 @@ def generar_nota_comodato(idComodato):
             return redirect(url_for('comodatos.listar_comodatos'))
 
         # --- Agrupar artículos idénticos ---
-        # Ahora se usa la función auxiliar importada
+        # Ahora se usa la nueva función auxiliar para procesar los items
         comodato_items_aggregated = _agregar_articulos_comodato(raw_comodato_items)
         # DEBUGGING: Log los items agregados antes de pasar al template
         logger.info(f"DEBUG_PDF_RENDER: Items passed to PDF template: {comodato_items_aggregated}")
