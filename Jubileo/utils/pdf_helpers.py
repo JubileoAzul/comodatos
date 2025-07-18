@@ -1,5 +1,3 @@
-# C:\Jubileo\utils\pdf_helpers.py
-
 from collections import defaultdict
 from flask import render_template, current_app
 import logging
@@ -82,7 +80,7 @@ def _agregar_articulos_comodato(items):
     return final_aggregated_list
 
 
-def _render_pdf_template_for_email(cliente_obj, comodato_items_list, main_comodato_ref_obj, total_importe_para_email):
+def main_comodato_ref(cliente_obj, comodato_items_list, main_comodato_ref_obj, total_importe_para_email):
     """
     Renders the comodato_note.html template specifically for email attachments.
     Requires an app context.
