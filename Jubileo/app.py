@@ -10,7 +10,7 @@ from flask_login import login_required, current_user
 from flask_mail import Message
 from sqlalchemy import func
 
-
+# Eliminamos 'scheduler' de las extensiones, ya no lo necesitamos
 from extensions import db, mail, login_manager
 
 import sys
@@ -92,7 +92,7 @@ def verificar_vencimientos():
     # como se maneja en el decorador @app.before_request.
     # No necesitamos el `if app is None:` check aquí directamente,
     # ya que el contexto de la app lo manejará.
-    
+
     hoy = datetime.now().date()
     fecha_limite = hoy + timedelta(days=7)
     logger.info(f"Iniciando ejecución de verificar_vencimientos. Hoy: {hoy}, Fecha límite: {fecha_limite}")
@@ -254,8 +254,33 @@ Sistema de Gestión de Comodatos
         error_message = f"Error al verificar los vencimientos: {e}"
         logger.error(error_message, exc_info=True)
         print(error_message)
+        # Asegurarse de que enviar_correo_error también se ejecute en el contexto de la app
+        # Si esta función se llama desde un hilo, el contexto ya debería estar activo.
         enviar_correo_error(asunto="Error al verificar vencimientos", cuerpo=error_message)
         db.session.rollback()
+
+
+# Define una función auxiliar para ejecutar la verificación en un hilo separado
+def _run_verification_in_background(app_instance):
+    """
+    Ejecuta la función verificar_vencimientos dentro del contexto de la aplicación.
+    Esto asegura que las extensiones de Flask (como db y mail) sean accesibles.
+    """
+    with app_instance.app_context():
+        try:
+            logger.info("Iniciando ejecución de verificar_vencimientos en el hilo de fondo.")
+            verificar_vencimientos()
+            logger.info("Verificación de vencimientos en el hilo de fondo completada.")
+        except Exception as e:
+            # Captura cualquier error que ocurra dentro de verificar_vencimientos
+            # y lo loguea, además de intentar enviar un correo de error.
+            error_message = f"Error crítico en el hilo de verificación de vencimientos: {e}"
+            logger.error(error_message, exc_info=True)
+            # Intenta enviar un correo de error si la app está disponible
+            try:
+                enviar_correo_error(asunto="Error en verificación de vencimientos en segundo plano", cuerpo=error_message)
+            except Exception as mail_e:
+                logger.error(f"No se pudo enviar correo de error de verificación en segundo plano: {mail_e}", exc_info=True)
 
 
 def create_app():
@@ -296,19 +321,11 @@ def create_app():
         global _verification_done_for_this_process
         global _verification_lock # Asegúrate de acceder a la global
 
-        # Usamos un candado para asegurar que solo un hilo intente ejecutar la verificación
-        # si múltiples solicitudes llegan al mismo tiempo en el inicio.
         with _verification_lock:
             if not _verification_done_for_this_process:
                 logger.info("Primer request recibido. Iniciando verificación de vencimientos en segundo plano...")
-                # Ejecutamos verificar_vencimientos en un hilo separado para no bloquear
-                # la respuesta al primer usuario que accede a la aplicación.
-                # Es crucial pasar el contexto de la aplicación al hilo si verificar_vencimientos
-                # necesita acceder a la configuración de la app o a la base de datos.
-                # La sintaxis `lambda: _app.app_context().push() or verificar_vencimientos() or _app.app_context().pop()`
-                # asegura que el contexto de la app esté disponible dentro del hilo.
-                # Usamos _app porque estamos dentro de la función create_app()
-                threading.Thread(target=lambda: _app.app_context().push() or verificar_vencimientos() or _app.app_context().pop()).start()
+                # Inicia el hilo, pasando la instancia de la aplicación (_app)
+                threading.Thread(target=_run_verification_in_background, args=(_app,)).start()
                 _verification_done_for_this_process = True
                 logger.info("Verificación de vencimientos iniciada. La aplicación responderá normalmente.")
 
@@ -327,7 +344,8 @@ if __name__ == '__main__':
     try:
         logger.info("Aplicación Flask inicializada.")
 
-       
+        # Eliminamos las líneas relacionadas con el scheduler y la ejecución manual
+        # de verificar_vencimientos aquí, ya que el @before_request lo manejará.
 
         app.run(debug=True, host='0.0.0.0', port=5000)
 
