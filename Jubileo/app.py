@@ -2,8 +2,9 @@ import sys
 import traceback
 import logging
 import os
-import threading #Necesario para ejecutar la verificación en segundo plano
+import threading # Necesario para ejecutar la verificación en segundo plano
 from datetime import datetime, timedelta
+from collections import defaultdict # ¡NUEVO! Importar para agrupar comodatos
 
 from flask import Flask, render_template, redirect, url_for, flash, request, send_file, current_app
 from flask_login import login_required, current_user
@@ -40,6 +41,7 @@ from routes.main import main_bp
 
 from config import Config
 from utils.error_handler import enviar_correo_error
+from utils.pdf_helpers import _agregar_articulos_comodato # ¡NUEVO! Importar la función de agrupación
 
 from weasyprint import HTML, CSS
 import io
@@ -98,69 +100,42 @@ def verificar_vencimientos():
     logger.info(f"Iniciando ejecución de verificar_vencimientos. Hoy: {hoy}, Fecha límite: {fecha_limite}")
 
     try:
-        comodatos_a_notificar_query = db.session.query(
-            CondicionesComodato.idComodato,
-            Cliente.NoFolio,
-            Cliente.nombreComercial,
-            Cliente.telefono,
-            Cliente.email,
-            Cliente.fechaPrestamo,
-            Cliente.tipoCliente,
-            Cliente.ruta,
-            Cliente.calle,
-            Cliente.numero,
-            Cliente.colonia,
-            Cliente.municipio,
-            Cliente.estado,
-            Cliente.cp,
-            CondicionesComodato.concepto,
-            CondicionesComodato.fechaDevolucion,
-            CondicionesComodato.motivoPrestamo,
-            CondicionesComodato.otroMotivo,
-            CondicionesComodato.folioSustitucion,
-            CondicionesComodato.cantidad,
-            CondicionesComodato.UM,
-            CondicionesComodato.costo,
-            CondicionesComodato.importe,
-            CondicionesComodato.importeTotal
-        ).join(Cliente, CondicionesComodato.NoFolio == Cliente.NoFolio).filter(
-            CondicionesComodato.fechaDevolucion <= fecha_limite,
-            CondicionesComodato.notificado_vencimiento == 0
+        # Obtener todos los comodatos que necesitan notificación y sus clientes asociados
+        # No filtramos por 'notificado_vencimiento' aquí inicialmente para poder agrupar
+        # y luego marcar en el bucle de envío.
+        raw_comodatos_a_notificar = db.session.query(CondicionesComodato, Cliente).join(
+            Cliente, CondicionesComodato.NoFolio == Cliente.NoFolio
+        ).filter(
+            CondicionesComodato.fechaDevolucion <= fecha_limite
         ).all()
 
-        logger.info(f"Se encontraron {len(comodatos_a_notificar_query)} comodatos para notificar.")
+        logger.info(f"Se encontraron {len(raw_comodatos_a_notificar)} comodatos para posible notificación (antes de agrupar y filtrar por notificado).")
 
-        for comodato_data in comodatos_a_notificar_query:
+        # Diccionario para agrupar comodatos por (NoFolio del cliente, fechaDevolucion)
+        # Cada entrada contendrá una lista de tuplas (CondicionesComodato, Cliente)
+        comodatos_agrupados = defaultdict(list)
 
-            comodato_para_pdf = CondicionesComodato(
-                idComodato=comodato_data.idComodato,
-                NoFolio=comodato_data.NoFolio,
-                fechaDevolucion=comodato_data.fechaDevolucion,
-                concepto=comodato_data.concepto,
-                cantidad=comodato_data.cantidad,
-                UM=comodato_data.UM,
-                costo=comodato_data.costo,
-                importe=comodato_data.importe,
-                importeTotal=comodato_data.importeTotal,
-                motivoPrestamo=comodato_data.motivoPrestamo,
-                otroMotivo=comodato_data.otroMotivo,
-                folioSustitucion=comodato_data.folioSustitucion
-            )
-            cliente_para_pdf = Cliente(
-                NoFolio=comodato_data.NoFolio,
-                nombreComercial=comodato_data.nombreComercial,
-                tipoCliente=comodato_data.tipoCliente,
-                fechaPrestamo=comodato_data.fechaPrestamo,
-                ruta=comodato_data.ruta,
-                telefono=comodato_data.telefono,
-                email=comodato_data.email,
-                calle=comodato_data.calle,
-                numero=comodato_data.numero,
-                colonia=comodato_data.colonia,
-                municipio=comodato_data.municipio,
-                estado=comodato_data.estado,
-                cp=comodato_data.cp
-            )
+        for comodato_obj, cliente_obj in raw_comodatos_a_notificar:
+            # Solo consideramos para notificación aquellos que aún no han sido notificados
+            if comodato_obj.notificado_vencimiento == 0:
+                key = (comodato_obj.NoFolio, comodato_obj.fechaDevolucion)
+                comodatos_agrupados[key].append((comodato_obj, cliente_obj))
+
+        logger.info(f"Se formaron {len(comodatos_agrupados)} grupos de comodatos a notificar.")
+
+        for (no_folio, fecha_devolucion_grupo), comodato_cliente_pairs in comodatos_agrupados.items():
+            # Tomamos el primer comodato y cliente del grupo para obtener los datos principales
+            # y el objeto cliente para el PDF y el correo.
+            main_comodato_obj = comodato_cliente_pairs[0][0] # Primer comodato del grupo
+            cliente_obj = comodato_cliente_pairs[0][1] # Cliente asociado a ese comodato
+
+            # Agrupar los ítems del comodato usando la función auxiliar
+            # Pasamos solo los objetos comodato a la función de agregación
+            comodato_items_aggregated = _agregar_articulos_comodato([c[0] for c in comodato_cliente_pairs])
+
+            # Calcular el importe total del grupo de comodatos agregados
+            final_grand_total = sum(item['importe'] for item in comodato_items_aggregated)
+            logger.debug(f"DEBUG_VERIFICACION: Calculated final_grand_total for group {no_folio}/{fecha_devolucion_grupo}: {final_grand_total:.2f}")
 
             datos_empresa = {
                 'nombre_empresa': 'Jubileo Azul S.A. de C.V.',
@@ -170,81 +145,63 @@ def verificar_vencimientos():
                 'email_empresa': 'pampajubileo@googlegroups.net',
             }
 
+            # Renderizar la plantilla HTML para el PDF
             rendered_html_pdf = render_template(
                 'pdf_templates/comodato_note.html',
-                comodato=comodato_para_pdf,
-                cliente=cliente_para_pdf,
+                main_comodato_ref=main_comodato_obj, # ¡Ahora pasamos la variable con el nombre esperado!
+                cliente=cliente_obj,
+                comodato_items=comodato_items_aggregated, # Pasamos la lista de ítems agregados para la tabla
+                grand_total_importe=final_grand_total, # Pasamos el total calculado
                 datos_empresa=datos_empresa
             )
 
             # current_app.root_path es necesario para que WeasyPrint encuentre los recursos CSS/imágenes locales
             pdf_bytes_generated = HTML(string=rendered_html_pdf, base_url=current_app.root_path).write_pdf()
-            pdf_filename = f'Nota_Comodato_{comodato_data.nombreComercial}_{comodato_data.NoFolio}_{comodato_data.idComodato}.pdf'
+            pdf_filename = f'Nota_Comodato_{cliente_obj.nombreComercial.replace(" ", "_")}_{cliente_obj.NoFolio}_FD_{fecha_devolucion_grupo.strftime("%Y%m%d")}.pdf'
 
-            asunto_cliente = f"Recordatorio de Vencimiento de Comodato - {comodato_data.concepto}"
+            asunto_cliente = f"Recordatorio de Vencimiento de Comodato - {cliente_obj.nombreComercial}"
             cuerpo_cliente = f"""
-Estimado/a {comodato_data.nombreComercial},
+Estimado/a {cliente_obj.nombreComercial},
 
-Este es un recordatorio de que su comodato del siguiente artículo está próximo a vencer:
+Este es un recordatorio de que uno o varios de sus comodatos están próximos a vencer.
+La fecha de devolución para este grupo de artículos es: {fecha_devolucion_grupo.strftime('%d/%m/%Y')}
 
-Concepto: {comodato_data.concepto}
-Fecha de Devolución: {comodato_data.fechaDevolucion.strftime('%d/%m/%Y')}
-
-Por favor, revise el archivo adjunto (Nota de Comodato) para obtener más información sobre los siguientes pasos.
+Por favor, revise el archivo adjunto (Nota de Comodato) para obtener más información sobre los artículos específicos.
 
 Atentamente,
 El equipo de Jubileo Azul
 """
-            destinatario_cliente = comodato_data.email
+            destinatario_cliente = cliente_obj.email
             if destinatario_cliente:
                 if enviar_correo_vencimiento(destinatario_cliente, asunto_cliente, cuerpo_cliente, pdf_bytes_generated, pdf_filename):
-                    comodato_a_actualizar = CondicionesComodato.query.get(comodato_data.idComodato)
-                    if comodato_a_actualizar:
-                        comodato_a_actualizar.notificado_vencimiento = 1
-                        db.session.commit()
-                        logger.info(f"Vencimiento de comodato {comodato_data.idComodato} notificado al cliente y marcado en DB.")
-                    else:
-                        logger.warning(f"Comodato {comodato_data.idComodato} no encontrado para actualizar notificación después de enviar al cliente.")
+                    # Marcar TODOS los comodatos de este grupo como notificados
+                    for comodato_to_update, _ in comodato_cliente_pairs:
+                        comodato_to_update.notificado_vencimiento = 1
+                    db.session.commit()
+                    logger.info(f"Vencimientos para cliente {cliente_obj.NoFolio} (fecha {fecha_devolucion_grupo}) notificados y marcados en DB.")
                 else:
-                    logger.error(f"No se pudo enviar el correo de vencimiento al cliente para el comodato {comodato_data.idComodato}.")
+                    logger.error(f"No se pudo enviar el correo de vencimiento al cliente {cliente_obj.NoFolio} para el grupo de comodatos.")
             else:
-                logger.warning(f"No se pudo enviar correo de vencimiento al cliente para el comodato {comodato_data.idComodato}: No hay correo electrónico del cliente.")
+                logger.warning(f"No se pudo enviar correo de vencimiento al cliente {cliente_obj.NoFolio} para el grupo de comodatos: No hay correo electrónico del cliente.")
 
-            encargado_email = current_app.config.get('ADMIN_EMAIL') # Usar current_app.config.get para leer ADMIN_EMAIL
+            encargado_email = current_app.config.get('ADMIN_EMAIL')
             if encargado_email:
-                asunto_encargado = f"[ENCARGADO] Vencimiento Próximo: Comodato ID {comodato_data.idComodato} - {comodato_data.concepto}"
+                asunto_encargado = f"[ENCARGADO] Vencimiento Próximo (Grupo): Cliente {cliente_obj.NoFolio} - {cliente_obj.nombreComercial}"
                 cuerpo_encargado = f"""
 Estimado Encargado,
 
-Se ha detectado un comodato próximo a vencer o ya vencido que requiere su atención.
+Se ha detectado un grupo de comodatos próximos a vencer o ya vencidos para el cliente {cliente_obj.nombreComercial} (No. Folio: {cliente_obj.NoFolio}).
+La fecha de devolución para este grupo es: {fecha_devolucion_grupo.strftime('%d/%m/%Y')}
 
-Detalles del Comodato:
-    ID Comodato: {comodato_data.idComodato}
-    Concepto: {comodato_data.concepto}
-    Motivo del Préstamo: {comodato_data.motivoPrestamo if comodato_data.motivoPrestamo else 'N/A'}
-    Fecha de Devolución: {comodato_data.fechaDevolucion.strftime('%d/%m/%Y')}
-    Cantidad: {comodato_data.cantidad if comodato_data.cantidad is not None else 'N/A'} {comodato_data.UM if comodato_data.UM else 'N/A'}
-    Importe Total: ${comodato_data.importeTotal if comodato_data.importeTotal is not None else 'N/A'}
-
-Detalles del Cliente:
-    No. Folio Cliente: {comodato_data.NoFolio}
-    Nombre Comercial: {comodato_data.nombreComercial}
-    Tipo de Cliente: {comodato_data.tipoCliente if comodato_data.tipoCliente else 'N/A'}
-    Teléfono: {comodato_data.telefono if comodato_data.telefono else 'N/A'}
-    Email del Cliente: {comodato_data.email if comodato_data.email else 'No Proporcionado'}
-    Dirección: {comodato_data.calle if comodato_data.calle else 'N/A'} {comodato_data.numero if comodato_data.numero else 'N/A'}, {comodato_data.colonia if comodato_data.colonia else 'N/A'}, {comodato_data.municipio if comodato_data.municipio else 'N/A'}, {comodato_data.estado if comodato_data.estado else 'N/A'}, CP {comodato_data.cp if comodato_data.cp else 'N/A'}
-    Ruta: {comodato_data.ruta if comodato_data.ruta else 'N/A'}
-    Fecha de Préstamo (Cliente): {comodato_data.fechaPrestamo.strftime('%d/%m/%Y') if comodato_data.fechaPrestamo else 'N/A'}
-
-Por favor, tome las acciones necesarias.
+Por favor, revise el archivo adjunto (Nota de Comodato) para obtener los detalles de los artículos.
 
 Atentamente,
 Sistema de Gestión de Comodatos
 """
-                if enviar_correo_vencimiento(encargado_email, asunto_encargado, cuerpo_encargado):
-                    logger.info(f"Vencimiento de comodato {comodato_data.idComodato} notificado al encargado {encargado_email}.")
+                if enviar_correo_vencimiento(encargado_email, asunto_encargado, cuerpo_encargado, pdf_bytes_generated, pdf_filename):
+                    logger.info(f"Vencimiento de grupo de comodatos para cliente {cliente_obj.NoFolio} notificado al encargado {encargado_email}.")
                 else:
-                    logger.error(f"No se pudo notificar el vencimiento del comodato {comodato_data.idComodato} al encargado {encargado_email}.")
+                    logger.error(f"No se pudo notificar el vencimiento del grupo de comodatos para cliente {cliente_obj.NoFolio} al encargado {encargado_email}.")
             else:
                 logger.warning("Email del encargado no configurado. No se envió notificación al encargado.")
 
@@ -254,8 +211,6 @@ Sistema de Gestión de Comodatos
         error_message = f"Error al verificar los vencimientos: {e}"
         logger.error(error_message, exc_info=True)
         print(error_message)
-        # Asegurarse de que enviar_correo_error también se ejecute en el contexto de la app
-        # Si esta función se llama desde un hilo, el contexto ya debería estar activo.
         enviar_correo_error(asunto="Error al verificar vencimientos", cuerpo=error_message)
         db.session.rollback()
 
