@@ -1,3 +1,5 @@
+# C:\Jubileo\routes\comodatos.py
+
 import io
 import logging
 from datetime import datetime, timedelta 
@@ -533,7 +535,8 @@ def generar_nota_comodato(idComodato):
             grand_total_importe=final_grand_total # Pasamos el total ya calculado
         )
 
-        pdf_bytes = HTML(string=rendered_html, base_url=request.url_root).write_pdf()
+        
+        pdf_bytes = HTML(string=rendered_html, base_url=current_app.root_path).write_pdf()
 
         download_name=f'Nota_Comodato_{cliente.nombreComercial.replace(" ", "_")}_{cliente.NoFolio}_FD_{fecha_devolucion_grupo.strftime("%Y%m%d")}.pdf'
         
