@@ -1,7 +1,9 @@
-# C:\Jubileo\utils\pdf_helpers.py
-
 from collections import defaultdict
 import logging
+
+# Importaciones necesarias para la nueva función _render_pdf_template_for_email
+from flask import render_template, current_app
+from weasyprint import HTML, CSS
 
 logger = logging.getLogger(__name__)
 
@@ -56,10 +58,8 @@ def _agregar_articulos_comodato(items):
 
         # Asignar el costo unitario del primer artículo encontrado para este grupo que tenga un costo válido
         # Esto evita sobrescribir un costo válido con 0.0 si un item posterior tiene costo nulo/inválido.
-        if costo_val != 0.0 and (agregados[key]['costo'] == 0.0 or agregados[key]['costo'] == None):
+        if costo_val != 0.0 and (agregados[key]['costo'] == 0.0 or agregados[key]['costo'] is None): # Usar 'is None' para mayor robustez
              agregados[key]['costo'] = costo_val
-        # Si el costo ya está establecido y el nuevo costo_val es diferente y válido, podrías querer loguear una advertencia
-        # o decidir qué costo prevalece. Por ahora, mantenemos el primero válido.
 
         agregados[key]['importe'] += importe_val
         
@@ -68,3 +68,27 @@ def _agregar_articulos_comodato(items):
     final_aggregated_list = list(agregados.values())
     logger.debug(f"DEBUG_AGGREGATION: Final aggregated list before return: {final_aggregated_list}")
     return final_aggregated_list
+
+
+def _render_pdf_template_for_email(cliente_obj, comodato_items_list, main_comodato_ref_obj, grand_total_importe):
+    """
+    Renders the comodato_note.html template specifically for email attachments.
+    Requires an app context.
+    """
+    datos_empresa = {
+        'nombre_empresa': 'Jubileo Azul S.A. de C.V.',
+        'rfc_empresa': 'JAZ990101XYZ', 
+        'direccion_empresa': 'AV. CRUZ AZUL S/N COL. CENTRO, CD. COOPERATIVA CRUZ AZUL, TULA DE ALLENDE, HGO. C.P. 42840', 
+        'telefono_empresa': '(S) 01 (773) 785 1962 / 785 2231', 
+        'email_empresa': 'pampajubileo@googlegroups.net', # Asegúrate que este email sea el correcto para tu empresa
+    }
+    
+    # Renderiza la plantilla con todas las variables necesarias
+    return render_template(
+        'pdf_templates/comodato_note.html',
+        cliente=cliente_obj, 
+        comodato_items=comodato_items_list,
+        datos_empresa=datos_empresa,
+        main_comodato_ref=main_comodato_ref_obj, # ¡Aquí se pasa la variable esperada por la plantilla!
+        grand_total_importe=grand_total_importe # Pasamos el total calculado desde Python
+    )
