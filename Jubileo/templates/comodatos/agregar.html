@@ -198,11 +198,7 @@
                 {# Columna Derecha: Datos del Comodato - Ahora con la línea divisoria vertical para pantallas grandes #}
                 <div class="lg:border-l-2 lg:border-gray-300 lg:pl-8"> {# Añadido borde izquierdo y padding para separación #}
                     <h3 class="text-xl font-semibold mb-4 text-gray-700">Datos del Comodato</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="form-group">
-                            <label for="motivoPrestamo" class="block text-gray-700 text-sm font-bold mb-2">Motivo Préstamo (*)</label>
-                            <input type="text" name="motivoPrestamo" id="motivoPrestamo" value="{{ form.motivoPrestamo if form.motivoPrestamo else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                        </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4"
                         <div class="form-group">
                             <label for="motivoPrestamo" class="block text-gray-700 text-sm font-bold mb-2">Motivo Préstamo (*)</label>
                             <select name="motivoPrestamo" id="motivoPrestamo" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
@@ -212,6 +208,10 @@
                                 <option value="anual">Anual</option>
                                 <option value="otro">Otro</option>
                             </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="otroMotivo" class="block text-gray-700 text-sm font-bold mb-2">Otro Motivo</label>
+                            <input type="text" name="otroMotivo" id="otroMotivo" value="{{ form.otroMotivo if form.otroMotivo else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         </div>
                         <div class="form-group">
                             <label for="fechaDevolucion" class="block text-gray-700 text-sm font-bold mb-2">Fecha Devolución (*)</label>
