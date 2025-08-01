@@ -141,10 +141,10 @@
                         <div class="form-group">
                             <label for="tipoCliente" class="block text-gray-700 text-sm font-bold mb-2">Tipo de Cliente (*)</label>
                             <select name="tipoCliente" id="tipoCliente" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                                <option value="" disabled selected>Selecciona un tipo</option>
-                                <option value="Empresarial">Empresarial</option>
-                                <option value="Abarrotes">Abarrotes</option>
-                                <option value="Hogar">Hogar</option>
+                                <option value="" disabled>Selecciona un tipo</option>
+                                <option value="Empresarial" {% if cliente.tipoCliente == 'Empresarial' %}selected{% endif %}>Empresarial</option>
+                                <option value="Abarrotes" {% if cliente.tipoCliente == 'Abarrotes' %}selected{% endif %}>Abarrotes</option>
+                                <option value="Hogar" {% if cliente.tipoCliente == 'Hogar' %}selected{% endif %}>Hogar</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -197,11 +197,11 @@
                         <div class="form-group">
                             <label for="motivoPrestamo" class="block text-gray-700 text-sm font-bold mb-2">Motivo Préstamo (*)</label>
                             <select name="motivoPrestamo" id="motivoPrestamo" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                                <option value="" disabled selected>Selecciona un motivo</option>
-                                <option value="Evento_Especial">Evento Especial</option>
-                                <option value="Patrocinio">Patrocinio</option>
-                                <option value="Anual">Anual</option>
-                                <option value="Otro">Otro</option>
+                                 <option value="" disabled>Selecciona un motivo</option>
+                                 <option value="Evento_Especial" {% if comodato.motivoPrestamo == 'Evento_Especial' %}selected{% endif %}>Evento Especial</option>
+                                 <option value="Patrocinio" {% if comodato.motivoPrestamo == 'Patrocinio' %}selected{% endif %}>Patrocinio</option>
+                                 <option value="Anual" {% if comodato.motivoPrestamo == 'Anual' %}selected{% endif %}>Anual</option>
+                                 <option value="Otro" {% if comodato.motivoPrestamo == 'Otro' %}selected{% endif %}>Otro</option>
                             </select>
                         </div>
                         <div class="form-group">
