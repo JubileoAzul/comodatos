@@ -24,6 +24,8 @@
             background-color: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
+            /* Agregado para que el botón de cerrar sea visible y accesible */
+            position: relative;
         }
         .flashes.info {
             background-color: #d1ecf1;
@@ -173,190 +175,195 @@
             </form>
         </div>
 
-        {# Contenido Principal (Botón y Tabla) #}
-        <div>
-            <a href="{{ url_for('comodatos.agregar_comodato') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:shadow-outline mb-4 inline-block shadow-md">
+        {# Contenido Principal (Botones y Tabla) #}
+        <div class="flex justify-between items-center mb-4">
+            <a href="{{ url_for('comodatos.agregar_comodato') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:shadow-outline shadow-md">
                 Agregar Comodato
             </a>
-
-            {% if comodatos %}
-                <div class="overflow-x-auto bg-white shadow-md rounded-lg rounded-xl">
-                    <table class="min-w-full leading-normal">
-                        <thead>
-                            <tr>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider rounded-tl-lg">
-                                    ID Comodato
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    No. Folio Cliente
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    No. Cliente
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Nombre Comercial
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Tipo Cliente
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Fecha Préstamo
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Ruta
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Teléfono
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Email
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Calle
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Número
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Colonia
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Municipio
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Estado
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    CP
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Motivo Préstamo
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Otro Motivo
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Fecha Devolución
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Folio Sustitución
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Cantidad
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    UM
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Concepto
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Costo
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Importe
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
-                                    Importe Total
-                                </th>
-                                <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider rounded-tr-lg">
-                                    Acciones
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for comodato in comodatos %}
-                                <tr>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.idComodato }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.NoFolioCliente }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.NoCliente }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.nombreComercialCliente }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.tipoCliente }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.fechaPrestamo }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.ruta }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.telefono }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.email }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.calle }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.numero }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.colonia }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.municipio }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.estado }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.cp }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.motivoPrestamo }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.otroMotivo }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.fechaDevolucion }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.folioSustitucion }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.cantidad }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.UM }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.concepto }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.costo }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.importe }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm">
-                                        {{ comodato.importeTotal }}
-                                    </td>
-                                    <td class="px-5 py-5 border-b border-gray-200 text-sm whitespace-no-wrap flex flex-col space-y-1 items-center">
-                                        <a href="{{ url_for('comodatos.editar_comodato', idComodato=comodato.idComodato) }}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded-md text-xs shadow-sm w-full text-center">Editar</a>
-                                        {# Botón que abre el modal de eliminación #}
-                                        <button type="button" class="open-delete-modal-btn bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-2 rounded-md text-xs shadow-sm w-full text-center" data-comodato-id="{{ comodato.idComodato }}">Eliminar</button>
-                                        <a href="{{ url_for('comodatos.generar_nota_comodato', idComodato=comodato.idComodato) }}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-2 rounded-md text-xs shadow-sm w-full text-center" target="_blank">PDF</a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <p class="text-gray-600 text-center py-4 bg-white shadow-md rounded-lg p-6">No se encontraron comodatos.</p>
-            {% endif %}
+            
+            {# NUEVO BOTÓN PARA EXPORTAR A EXCEL #}
+            <a href="{{ url_for('comodatos.descargar_excel', query=search_query, fecha_prestamo_search=fecha_prestamo_search, fecha_devolucion_search=fecha_devolucion_search) }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:shadow-outline shadow-md">
+              <i class="fas fa-file-excel"></i> Descargar Excel
+            </a>
         </div>
+
+        {% if comodatos %}
+            <div class="overflow-x-auto bg-white shadow-md rounded-lg rounded-xl">
+                <table class="min-w-full leading-normal">
+                    <thead>
+                        <tr>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider rounded-tl-lg">
+                                ID Comodato
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                No. Folio Cliente
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                No. Cliente
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                Nombre Comercial
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                Tipo Cliente
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                Fecha Préstamo
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                Ruta
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                Teléfono
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                Email
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                Calle
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                Número
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                Colonia
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                Municipio
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                Estado
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                CP
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                Motivo Préstamo
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                Otro Motivo
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                Fecha Devolución
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                Folio Sustitución
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                Cantidad
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                UM
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                Concepto
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                Costo
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                Importe
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider">
+                                Importe Total
+                            </th>
+                            <th class="px-5 py-3 border-b-2 border-gray-200 bg-blue-800 text-left text-xs font-semibold text-white uppercase tracking-wider rounded-tr-lg">
+                                Acciones
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for comodato in comodatos %}
+                            <tr>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.idComodato }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.NoFolioCliente }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.NoCliente }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.nombreComercialCliente }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.tipoCliente }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.fechaPrestamo }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.ruta }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.telefono }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.email }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.calle }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.numero }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.colonia }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.municipio }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.estado }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.cp }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.motivoPrestamo }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.otroMotivo }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.fechaDevolucion }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.folioSustitucion }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.cantidad }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.UM }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.concepto }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.costo }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.importe }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm">
+                                    {{ comodato.importeTotal }}
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 text-sm whitespace-no-wrap flex flex-col space-y-1 items-center">
+                                    <a href="{{ url_for('comodatos.editar_comodato', idComodato=comodato.idComodato) }}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-2 rounded-md text-xs shadow-sm w-full text-center">Editar</a>
+                                    {# Botón que abre el modal de eliminación #}
+                                    <button type="button" class="open-delete-modal-btn bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-2 rounded-md text-xs shadow-sm w-full text-center" data-comodato-id="{{ comodato.idComodato }}">Eliminar</button>
+                                    <a href="{{ url_for('comodatos.generar_nota_comodato', idComodato=comodato.idComodato) }}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-1 px-2 rounded-md text-xs shadow-sm w-full text-center" target="_blank">PDF</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-gray-600 text-center py-4 bg-white shadow-md rounded-lg p-6">No se encontraron comodatos.</p>
+        {% endif %}
     </div>
 
     <footer class="app-footer">
@@ -410,7 +417,7 @@
                 currentComodatoId = null; // Limpiar el ID
             });
 
-            // Cerrar el modal al hacer clic fuera de él
+            // Cerrar el modal al hacer clic fuera de el
             deleteModal.addEventListener('click', function(event) {
                 if (event.target === deleteModal) {
                     deleteModal.classList.add('hidden');
@@ -426,6 +433,7 @@
                     deleteForm.submit();
                 }
             });
+            
         });
     </script>
 </body>
