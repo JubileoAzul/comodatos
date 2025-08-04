@@ -1,5 +1,3 @@
-# C:\Jubileo\routes\comodatos.py
-
 import io
 import logging
 from datetime import datetime, timedelta 
@@ -7,7 +5,9 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from sqlalchemy import func, or_ 
 from collections import defaultdict 
-
+import openpyxl
+from openpyxl.utils import get_column_letter
+import io
 from weasyprint import HTML, CSS 
 
 from extensions import db 
@@ -160,6 +160,124 @@ def listar_comodatos():
         )
         flash('Ocurrió un error al cargar la lista de comodatos.', 'error')
         return redirect(url_for('main.index'))
+@comodatos_bp.route('/descargar_excel', methods=['GET'])
+@login_required
+def descargar_excel():
+    """
+    Ruta para descargar la lista de comodatos en formato Excel (.xlsx).
+    Respeta los filtros de búsqueda aplicados en la tabla.
+    """
+    try:
+        # Obtener los mismos parámetros de filtro de la ruta listar_comodatos
+        search_query = request.args.get('query', '').strip()
+        fecha_prestamo_search_str = request.args.get('fecha_prestamo_search', '').strip()
+        fecha_devolucion_search_str = request.args.get('fecha_devolucion_search', '').strip()
+
+        # Replicar la lógica de la consulta de listar_comodatos
+        query = db.session.query(CondicionesComodato, Cliente).join(
+            Cliente, CondicionesComodato.NoFolio == Cliente.NoFolio
+        )
+
+        # Aplicar los filtros si existen
+        if search_query:
+            search_pattern = f"%{search_query}%"
+            query = query.filter(
+                or_(
+                    Cliente.nombreComercial.ilike(search_pattern),
+                    Cliente.telefono.ilike(search_pattern),
+                    Cliente.email.ilike(search_pattern),
+                    CondicionesComodato.concepto.ilike(search_pattern)
+                    # Aquí puedes agregar más campos si es necesario
+                )
+            )
+
+        if fecha_prestamo_search_str:
+            fecha_prestamo_search = datetime.strptime(fecha_prestamo_search_str, '%Y-%m-%d').date()
+            query = query.filter(Cliente.fechaPrestamo == fecha_prestamo_search)
+        
+        if fecha_devolucion_search_str:
+            fecha_devolucion_search = datetime.strptime(fecha_devolucion_search_str, '%Y-%m-%d').date()
+            query = query.filter(CondicionesComodato.fechaDevolucion == fecha_devolucion_search)
+
+        # Obtener todos los resultados sin paginación ni límite
+        comodatos_con_clientes = query.all()
+
+        # Crear un nuevo libro de trabajo de Excel
+        workbook = openpyxl.Workbook()
+        sheet = workbook.active
+        sheet.title = "Comodatos"
+
+        # Definir los encabezados de la tabla
+        headers = [
+            'No. Folio Cliente', 'No. Cliente', 'Nombre Comercial', 'Tipo Cliente',
+            'Fecha Préstamo', 'Ruta', 'Teléfono', 'Email', 'Calle', 'Número',
+            'Colonia', 'Municipio', 'Estado', 'CP', 'Motivo Préstamo', 'Otro Motivo',
+            'Fecha Devolución', 'Folio Sustitución', 'Cantidad', 'UM', 'Concepto',
+            'Costo', 'Importe', 'Importe Total'
+        ]
+        sheet.append(headers)
+
+        # Llenar la hoja de cálculo con los datos
+        for comodato, cliente in comodatos_con_clientes:
+            row_data = [
+                cliente.NoFolio,
+                cliente.NoCliente,
+                cliente.nombreComercial,
+                cliente.tipoCliente,
+                cliente.fechaPrestamo.strftime('%d/%m/%Y') if cliente.fechaPrestamo else 'N/A',
+                cliente.ruta,
+                cliente.telefono,
+                cliente.email,
+                cliente.calle,
+                cliente.numero,
+                cliente.colonia,
+                cliente.municipio,
+                cliente.estado,
+                cliente.cp,
+                comodato.motivoPrestamo,
+                comodato.otroMotivo,
+                comodato.fechaDevolucion.strftime('%d/%m/%Y') if comodato.fechaDevolucion else 'N/A',
+                comodato.folioSustitucion,
+                comodato.cantidad,
+                comodato.UM,
+                comodato.concepto,
+                comodato.costo,
+                comodato.importe,
+                comodato.importeTotal
+            ]
+            sheet.append(row_data)
+
+        # Opcional: ajustar el ancho de las columnas
+        for col in sheet.columns:
+            max_length = 0
+            column = get_column_letter(col[0].column)
+            for cell in col:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(cell.value)
+                except:
+                    pass
+            adjusted_width = (max_length + 2)
+            sheet.column_dimensions[column].width = adjusted_width
+
+        # Guardar el libro de trabajo en un objeto en memoria
+        output = io.BytesIO()
+        workbook.save(output)
+        output.seek(0)
+
+        # Enviar el archivo al usuario para su descarga
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name='comodatos.xlsx'
+        )
+
+    except Exception as e:
+        error_msg = f"Error al generar el archivo Excel de comodatos: {e}"
+        logger.error(error_msg, exc_info=True)
+        flash('Ocurrió un error al generar el archivo Excel.', 'error')
+        return redirect(url_for('comodatos.listar_comodatos'))
 
 
 # --- Ruta para agregar un nuevo comodato ---
