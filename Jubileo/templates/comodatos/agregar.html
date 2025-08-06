@@ -229,9 +229,19 @@
                             <label for="UM" class="block text-gray-700 text-sm font-bold mb-2">UM</label>
                             <input type="text" name="UM" id="UM" value="{{ form.UM if form.UM else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         </div>
-                        <div class="form-group">
-                            <label for="concepto" class="block text-gray-700 text-sm font-bold mb-2">Concepto (*)</label>
-                            <input type="text" name="concepto" id="concepto" value="{{ form.concepto if form.concepto else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                        <div class="mb-4">
+                            <label for="concepto" class="block text-sm font-medium text-gray-700">Concepto</label>
+                            <select name="concepto" id="concepto" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                <option value="" disabled selected>Selecciona un concepto</option>
+                                <option value="Conservador">Conservador</option>
+                                <option value="Garrafón 11 Litros">Garrafón 11 Litros</option>
+                                <option value="Garrafón 19 Litros">Garrafón 19 Litros</option>
+                                <option value="Garrafón 20 Litros">Garrafón 20 Litros</option>
+                                <option value="Despachador">Despachador</option>
+                                <option value="Refrigerador">Refrigerador</option>
+                                <option value="Exhibidor">Exhibidor</option>
+                                <option value="Otro">Otro</option>
+                            </select>
                         </div>
                         <div class="form-group">
                             <label for="costo" class="block text-gray-700 text-sm font-bold mb-2">Costo</label>
