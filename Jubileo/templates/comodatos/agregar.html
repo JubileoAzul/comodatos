@@ -196,67 +196,67 @@
                 </div>
 
                 {# Columna Derecha: Datos del Comodato - Ahora con la línea divisoria vertical para pantallas grandes #}
-                <div class="lg:border-l-2 lg:border-gray-300 lg:pl-8"> {# Añadido borde izquierdo y padding para separación #}
-                    <h3 class="text-xl font-semibold mb-4 text-gray-700">Datos del Comodato</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4"/>
-                        <div class="form-group">
-                            <label for="motivoPrestamo" class="block text-gray-700 text-sm font-bold mb-2">Motivo Préstamo (*)</label>
-                            <select name="motivoPrestamo" id="motivoPrestamo" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                                <option value="" disabled selected>Selecciona un motivo</option>
-                                <option value="evento_especial">Evento Especial</option>
-                                <option value="patrocinio">Patrocinio</option>
-                                <option value="anual">Anual</option>
-                                <option value="otro">Otro</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="otroMotivo" class="block text-gray-700 text-sm font-bold mb-2">Otro Motivo</label>
-                            <input type="text" name="otroMotivo" id="otroMotivo" value="{{ form.otroMotivo if form.otroMotivo else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
-                        <div class="form-group">
-                            <label for="fechaDevolucion" class="block text-gray-700 text-sm font-bold mb-2">Fecha Devolución (*)</label>
-                            <input type="date" name="fechaDevolucion" id="fechaDevolucion" value="{{ form.fechaDevolucion if form.fechaDevolucion else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="folioSustitucion" class="block text-gray-700 text-sm font-bold mb-2">Folio Sustitución</label>
-                            <input type="text" name="folioSustitucion" id="folioSustitucion" value="{{ form.folioSustitucion if form.folioSustitucion else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
-                        <div class="form-group">
-                            <label for="cantidad" class="block text-gray-700 text-sm font-bold mb-2">Cantidad (*)</label>
-                            <input type="number" name="cantidad" id="cantidad" value="{{ form.cantidad if form.cantidad else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="UM" class="block text-gray-700 text-sm font-bold mb-2">UM</label>
-                            <input type="text" name="UM" id="UM" value="{{ form.UM if form.UM else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
-                        <div class="mb-4">
-                            <label for="concepto" class="block text-sm font-medium text-gray-700">Concepto</label>
-                            <select name="concepto" id="concepto" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                <option value="" disabled selected>Selecciona un concepto</option>
-                                <option value="Conservador">Conservador</option>
-                                <option value="Garrafón 11 Litros">Garrafón 11 Litros</option>
-                                <option value="Garrafón 19 Litros">Garrafón 19 Litros</option>
-                                <option value="Garrafón 20 Litros">Garrafón 20 Litros</option>
-                                <option value="Despachador">Despachador</option>
-                                <option value="Refrigerador">Refrigerador</option>
-                                <option value="Exhibidor">Exhibidor</option>
-                                <option value="Tarima">Tarima</option>
-                                <option value="Otro">Otro</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="costo" class="block text-gray-700 text-sm font-bold mb-2">Costo</label>
-                            <input type="number" step="0.01" name="costo" id="costo" value="{{ form.costo if form.costo else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
-                        <div class="form-group">
-                            <label for="importe" class="block text-gray-700 text-sm font-bold mb-2">Importe</label>
-                            <input type="number" step="0.01" name="importe" id="importe" value="{{ form.importe if form.importe else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
-                        <div class="form-group">
-                            <label for="importeTotal" class="block text-gray-700 text-sm font-bold mb-2">Importe Total (*)</label>
-                            <input type="number" step="0.01" name="importeTotal" id="importeTotal" value="{{ form.importeTotal if form.importeTotal else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                        </div>
-                    </div>
+                <div class="lg:border-l-2 lg:border-gray-300 lg:pl-8">
+    <h3 class="text-xl font-semibold mb-4 text-gray-700">Datos del Comodato</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="form-group">
+            <label for="motivoPrestamo" class="block text-gray-700 text-sm font-bold mb-2">Motivo Préstamo (*)</label>
+            <select name="motivoPrestamo" id="motivoPrestamo" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+                <option value="" disabled selected>Selecciona un motivo</option>
+                <option value="Evento_Especial">Evento Especial</option>
+                <option value="Patrocinio">Patrocinio</option>
+                <option value="Anual">Anual</option>
+                <option value="Otro">Otro</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="otroMotivo" class="block text-gray-700 text-sm font-bold mb-2">Otro Motivo</label>
+            <input type="text" name="otroMotivo" id="otroMotivo" value="{{ form.otroMotivo if form.otroMotivo else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        </div>
+        <div class="form-group">
+            <label for="fechaDevolucion" class="block text-gray-700 text-sm font-bold mb-2">Fecha Devolución (*)</label>
+            <input type="date" name="fechaDevolucion" id="fechaDevolucion" value="{{ form.fechaDevolucion if form.fechaDevolucion else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+        </div>
+        <div class="form-group">
+            <label for="folioSustitucion" class="block text-gray-700 text-sm font-bold mb-2">Folio Sustitución</label>
+            <input type="text" name="folioSustitucion" id="folioSustitucion" value="{{ form.folioSustitucion if form.folioSustitucion else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        </div>
+        <div class="form-group">
+            <label for="cantidad" class="block text-gray-700 text-sm font-bold mb-2">Cantidad (*)</label>
+            <input type="number" name="cantidad" id="cantidad" value="{{ form.cantidad if form.cantidad else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
+        </div>
+        <div class="form-group">
+            <label for="UM" class="block text-gray-700 text-sm font-bold mb-2">UM</label>
+            <input type="text" name="UM" id="UM" value="{{ form.UM if form.UM else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        </div>
+        <div class="form-group">
+            <label for="concepto" class="block text-gray-700 text-sm font-bold mb-2">Concepto</label>
+            <select name="concepto" id="concepto" required class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="" disabled selected>Selecciona un concepto</option>
+                <option value="Conservador">Conservador</option>
+                <option value="Garrafón 11 Litros">Garrafón 11 Litros</option>
+                <option value="Garrafón 19 Litros">Garrafón 19 Litros</option>
+                <option value="Garrafón 20 Litros">Garrafón 20 Litros</option>
+                <option value="Despachador">Despachador</option>
+                <option value="Refrigerador">Refrigerador</option>
+                <option value="Exhibidor">Exhibidor</option>
+                <option value="Otro">Otro</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="costo" class="block text-gray-700 text-sm font-bold mb-2">Costo</label>
+            <input type="number" step="0.01" name="costo" id="costo" value="{{ form.costo if form.costo else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        </div>
+        <div class="form-group">
+            <label for="importe" class="block text-gray-700 text-sm font-bold mb-2">Importe</label>
+            <input type="number" step="0.01" name="importe" id="importe" value="{{ form.importe if form.importe else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" readonly>
+        </div>
+        <div class="form-group">
+            <label for="importeTotal" class="block text-gray-700 text-sm font-bold mb-2">Importe Total (*)</label>
+            <input type="number" step="0.01" name="importeTotal" id="importeTotal" value="{{ form.importeTotal if form.importeTotal else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required readonly>
+        </div>
+    </div>
+</div>
                 </div>
             </div>
 
@@ -277,4 +277,41 @@
         <p>Dirección: AV. CRUZ AZUL S/N COL. CENTRO, CD. COOPERATIVA CRUZ AZUL, TULA DE ALLENDE, HGO. C.P. 42840</p>
     </footer>
 </body>
+<script>
+    // Obtener los elementos del DOM
+    const cantidadInput = document.getElementById('cantidad');
+    const costoInput = document.getElementById('costo');
+    const importeInput = document.getElementById('importe');
+    const importeTotalInput = document.getElementById('importeTotal');
+
+    function formatNumber(num) {
+        return num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    function calcularImporte() {
+        const cantidad = parseFloat(cantidadInput.value) || 0;
+        const costo = parseFloat(costoInput.value) || 0;
+        const resultado = cantidad * costo;
+
+        // Actualizar los valores de los campos de importe
+        // Asegúrate de que los campos numéricos se llenen sin formato de dinero
+        importeInput.value = resultado.toFixed(2);
+        importeTotalInput.value = resultado.toFixed(2);
+    }
+
+    // Escuchar los eventos 'input' en los campos de cantidad y costo
+    cantidadInput.addEventListener('input', calcularImporte);
+    costoInput.addEventListener('input', calcularImporte);
+
+    // Formateo de los campos numéricos al perder el foco (blur)
+    function formatAsCurrency(event) {
+        const value = parseFloat(event.target.value);
+        if (!isNaN(value)) {
+            // El formato de moneda con el signo de $ lo puedes manejar al mostrar los datos
+            // En el campo input, es mejor mantener el número puro para evitar problemas al enviarlo
+            // event.target.value = `$${formatNumber(value)}`; // Descomenta esta línea si quieres mostrar el formato
+        }
+    }
+    
+</script>
 </html>
