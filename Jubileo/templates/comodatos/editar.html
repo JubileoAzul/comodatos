@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Comodato - Jubileo Azul</title>
-    <!-- Incluir Tailwind CSS desde CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}" type="image/png">    <style>
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.png') }}" type="image/png">
+    <style>
         /* Estilos personalizados para mensajes flash */
         .flashes {
             padding: 1rem;
@@ -105,7 +105,6 @@
 <body class="bg-gray-100 font-sans leading-normal tracking-normal">
     <header class="page-header">
         <div class="logo-container">
-            <!-- Reemplaza esta URL con la ruta a tu logo real -->
             <img src="/static/images/logo2.png" alt="Logo Jubileo Azul" class="logo">
             <h1>Editar Comodato</h1>
         </div>
@@ -197,11 +196,11 @@
                         <div class="form-group">
                             <label for="motivoPrestamo" class="block text-gray-700 text-sm font-bold mb-2">Motivo Préstamo (*)</label>
                             <select name="motivoPrestamo" id="motivoPrestamo" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" required>
-                                 <option value="" disabled>Selecciona un motivo</option>
-                                 <option value="Evento_Especial" {% if comodato.motivoPrestamo == 'Evento_Especial' %}selected{% endif %}>Evento Especial</option>
-                                 <option value="Patrocinio" {% if comodato.motivoPrestamo == 'Patrocinio' %}selected{% endif %}>Patrocinio</option>
-                                 <option value="Anual" {% if comodato.motivoPrestamo == 'Anual' %}selected{% endif %}>Anual</option>
-                                 <option value="Otro" {% if comodato.motivoPrestamo == 'Otro' %}selected{% endif %}>Otro</option>
+                                <option value="" disabled>Selecciona un motivo</option>
+                                <option value="Evento_Especial" {% if comodato.motivoPrestamo == 'Evento_Especial' %}selected{% endif %}>Evento Especial</option>
+                                <option value="Patrocinio" {% if comodato.motivoPrestamo == 'Patrocinio' %}selected{% endif %}>Patrocinio</option>
+                                <option value="Anual" {% if comodato.motivoPrestamo == 'Anual' %}selected{% endif %}>Anual</option>
+                                <option value="Otro" {% if comodato.motivoPrestamo == 'Otro' %}selected{% endif %}>Otro</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -225,19 +224,18 @@
                             <input type="text" name="UM" id="UM" value="{{ comodato.UM if comodato.UM else '' }}" class="shadow-sm appearance-none border-2 border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                         </div>
                         <div class="mb-4">
-                             <label for="concepto" class="block text-sm font-medium text-gray-700">Concepto</label>
-                              <select name="concepto" id="concepto" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                <option value="" disabled>Selecciona un concepto</option>
-                                <option value="Conservador" {% if comodato.concepto == 'Conservador' %}selected{% endif %}>Conservador</option>
-                                <option value="Garrafón 11 Litros" {% if comodato.concepto == 'Garrafón 11 Litros' %}selected{% endif %}>Garrafón 11 Litros</option>
-                                <option value="Garrafón 19 Litros" {% if comodato.concepto == 'Garrafón 19 Litros' %}selected{% endif %}>Garrafón 19 Litros</option>
-                                <option value="Garrafón 20 Litros" {% if comodato.concepto == 'Garrafón 20 Litros' %}selected{% endif %}>Garrafón 20 Litros</option>
-                                <option value="Despachador" {% if comodato.concepto == 'Despachador' %}selected{% endif %}>Despachador</option>
-                                <option value="Refrigerador" {% if comodato.concepto == 'Refrigerador' %}selected{% endif %}>Refrigerador</option>
-                                <option value="Exhibidor" {% if comodato.concepto == 'Exhibidor' %}selected{% endif %}>Exhibidor</option>
-                                <option value="Tarima" {% if comodato.concepto == 'Tarima' %}selected{% endif %}>Tarima</option>
-                                <option value="Otro" {% if comodato.concepto == 'Otro' %}selected{% endif %}>Otro</option>
-                            </select>
+                                <label for="concepto" class="block text-sm font-medium text-gray-700">Concepto</label>
+                                <select name="concepto" id="concepto" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                    <option value="" disabled>Selecciona un concepto</option>
+                                    <option value="Conservador" {% if comodato.concepto == 'Conservador' %}selected{% endif %}>Conservador</option>
+                                    <option value="Garrafón 11 Litros" {% if comodato.concepto == 'Garrafón 11 Litros' %}selected{% endif %}>Garrafón 11 Litros</option>
+                                    <option value="Garrafón 19 Litros" {% if comodato.concepto == 'Garrafón 19 Litros' %}selected{% endif %}>Garrafón 19 Litros</option>
+                                    <option value="Garrafón 20 Litros" {% if comodato.concepto == 'Garrafón 20 Litros' %}selected{% endif %}>Garrafón 20 Litros</option>
+                                    <option value="Despachador" {% if comodato.concepto == 'Despachador' %}selected{% endif %}>Despachador</option>
+                                    <option value="Refrigerador" {% if comodato.concepto == 'Refrigerador' %}selected{% endif %}>Refrigerador</option>
+                                    <option value="Exhibidor" {% if comodato.concepto == 'Exhibidor' %}selected{% endif %}>Exhibidor</option>
+                                    <option value="Otro" {% if comodato.concepto == 'Otro' %}selected{% endif %}>Otro</option>
+                                </select>
                         </div>
                         <div class="form-group">
                             <label for="costo" class="block text-gray-700 text-sm font-bold mb-2">Costo</label>
@@ -307,6 +305,23 @@
             const confirmRenewalBtn = document.getElementById('confirmRenewalBtn');
             const renewalForm = document.getElementById('renewalForm');
 
+            const cantidadInput = document.getElementById('cantidad');
+        const costoInput = document.getElementById('costo');
+        const importeInput = document.getElementById('importe');
+        const importeTotalInput = document.getElementById('importeTotal');
+        
+        function calcularImportes() {
+            const cantidad = parseFloat(cantidadInput.value) || 0;
+            const costo = parseFloat(costoInput.value) || 0;
+            const importe = cantidad * costo;
+            
+            importeInput.value = importe.toFixed(2);
+            importeTotalInput.value = importe.toFixed(2);
+        }
+
+        cantidadInput.addEventListener('input', calcularImportes);
+        costoInput.addEventListener('input', calcularImportes);
+
             // Mostrar el modal
             openModalBtn.addEventListener('click', function() {
                 renewalModal.classList.remove('hidden');
@@ -328,6 +343,7 @@
             confirmRenewalBtn.addEventListener('click', function() {
                 renewalForm.submit(); // Envía el formulario oculto
             });
+            
         });
     </script>
 </body>
