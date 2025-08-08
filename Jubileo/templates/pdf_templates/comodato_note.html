@@ -7,7 +7,7 @@
     <style>
         /* Estilos generales para el documento PDF */
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Arial', sans-serif;   
             font-size: 9pt; /* Ligeramente reducido para caber en una página */
             line-height: 1.25; /* Más compacto */
             color: #333;
@@ -117,9 +117,10 @@
 
         .info-field strong {
             display: block;
-            font-size: 6.5pt; /* Etiqueta más pequeña */
-            color: #666;
-            margin-bottom: 0.5pt; /* Márgenes muy pequeños */
+            font-size: 7pt;
+            color: #000;
+            font-weight: 700;
+            margin-bottom: 1pt;
         }
 
         .info-field.full-width {
@@ -153,9 +154,9 @@
         }
 
         table th {
-            background-color: #d0d0d0; 
-            color: #333;
-            font-weight: bold;
+            background-color:rgba(208, 208, 208, 0.95);
+            color: #000; 
+            font-weight: 800; 
         }
 
         .text-center { text-align: center; }
@@ -242,7 +243,7 @@
 
         <div class="info-grid">
             <div class="info-field span-2"><strong>FECHA:</strong> <span>{{ cliente.fechaPrestamo.strftime('%d-%m-%Y') if cliente.fechaPrestamo else 'N/A' }}</span></div>
-            <div class="info-field span-2"><strong>No. DE CLIENTE:</strong> <span>{{ cliente.NoCliente if cliente.NoCliente else 'N/A' }}</span></div> {# <--- CAMBIO AQUÍ: Usar cliente.NoCliente #}
+            <div class="info-field span-2"><strong>No. DE CLIENTE:</strong> <span>{{ cliente.NoCliente if cliente.NoCliente else 'N/A' }}</span></div>
 
             <div class="info-field span-2"><strong>TIPO DE CLIENTE:</strong> EMPRESARIAL <span class="checkbox-box">{% if cliente.tipoCliente == 'Empresarial' %}X{% else %}&nbsp;&nbsp;{% endif %}</span>&nbsp;&nbsp; HOGAR <span class="checkbox-box">{% if cliente.tipoCliente == 'Hogar' %}X{% else %}&nbsp;&nbsp;{% endif %}</span>&nbsp;&nbsp; ABARROTES <span class="checkbox-box">{% if cliente.tipoCliente == 'Abarrotes' %}X{% else %}&nbsp;&nbsp;{% endif %}</span></div>
             <div class="info-field span-2"><strong>RUTA:</strong> <span>{{ cliente.ruta if cliente.ruta else 'N/A' }}</span></div>
@@ -253,9 +254,9 @@
             <div class="info-field span-2"><strong>TEL (S):</strong> <span>{{ cliente.telefono if cliente.telefono else 'N/A' }}</span></div>
             <div class="info-field span-2"><strong>COLONIA:</strong> <span>{{ cliente.colonia if cliente.colonia else 'N/A' }}</span></div>
             
-            {# AÑADIDO: Email del Cliente debajo de Colonia #}
+            {# AÑADIDO: Email del Cliente y Fecha de Devolución #}
             <div class="info-field span-2"><strong>EMAIL:</strong> <span>{{ cliente.email if cliente.email else 'N/A' }}</span></div>
-            <div class="info-field span-2"></div> {# Celda vacía para completar la fila #}
+            <div class="info-field span-2"><strong>FECHA DE DEVOLUCION DE MATERIAL:</strong> <span>{{ main_comodato_ref.fechaDevolucion.strftime('%d-%m-%Y') if main_comodato_ref.fechaDevolucion else 'N/A' }}</span></div>
 
             <div class="info-field full-width"><strong>DIRECCION DE ENTREGA:</strong> CALLE <span>{{ cliente.calle if cliente.calle else 'N/A' }}</span> NO. <span>{{ cliente.numero if cliente.numero else 'N/A' }}</span> COL. <span>{{ cliente.colonia if cliente.colonia else 'N/A' }}</span> C.P. <span>{{ cliente.cp if cliente.cp.strip() else 'N/A' }}</span></div>
 
@@ -266,15 +267,15 @@
 
             <div class="info-field span-2">
                 <strong>MOTIVO DE PRESTAMO:</strong> 
-                EVENTO ESPECIAL <span class="checkbox-box">&nbsp;&nbsp;</span>&nbsp;&nbsp; 
-                ANUAL <span class="checkbox-box">X</span>&nbsp;&nbsp; 
-                PATROCINIO <span class="checkbox-box">&nbsp;&nbsp;</span>&nbsp;&nbsp; 
-                OTRO <span class="checkbox-box">&nbsp;&nbsp;</span>
+                EVENTO ESPECIAL <span class="checkbox-box">{% if main_comodato_ref.motivoPrestamo == 'Evento Especial' %}X{% else %}&nbsp;&nbsp;{% endif %}</span>&nbsp;&nbsp; 
+                ANUAL <span class="checkbox-box">{% if main_comodato_ref.motivoPrestamo == 'Anual' %}X{% else %}&nbsp;&nbsp;{% endif %}</span>&nbsp;&nbsp; 
+                PATROCINIO <span class="checkbox-box">{% if main_comodato_ref.motivoPrestamo == 'Patrocinio' %}X{% else %}&nbsp;&nbsp;{% endif %}</span>&nbsp;&nbsp; 
+                OTRO <span class="checkbox-box">{% if main_comodato_ref.motivoPrestamo == 'Otro' %}X{% else %}&nbsp;&nbsp;{% endif %}</span>
             </div>
             <div class="info-field span-2"><strong>FOLIO DE SUSTITUCION:</strong> <span>{{ main_comodato_ref.folioSustitucion if main_comodato_ref.folioSustitucion else 'N/A' }}</span></div>
 
-            <div class="info-field span-2"><strong>FECHA DE DEVOLUCION DE MATERIAL:</strong> <span>{{ main_comodato_ref.fechaDevolucion.strftime('%d-%m-%Y') if main_comodato_ref.fechaDevolucion else 'N/A' }}</span></div>
-            <div class="info-field span-2"></div>
+            {# REMOVIDO: FECHA DE DEVOLUCION DE MATERIAL de aquí para optimizar espacio #}
+            {# REMOVIDO: Celda vacía que acompañaba a la fecha de devolución #}
         </div>
 
         <table>
@@ -313,9 +314,7 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="3" class="text-right" style="border: none; padding-right: 5pt;">
-                        <strong>IMPORTE EN GARANTIA:</strong> SI <span class="checkbox-box">{% if main_comodato_ref.importeEnGarantia %}X{% else %}&nbsp;&nbsp;{% endif %}</span>&nbsp;&nbsp; NO <span class="checkbox-box">{% if not main_comodato_ref.importeEnGarantia %}X{% else %}&nbsp;&nbsp;{% endif %}</span>
-                    </td>
+                    
                     <td class="text-right" style="border: none; font-weight: bold;">IMPORTE TOTAL</td>
                     <td class="text-right" style="background-color: #f2f2f2; font-weight: bold;">${{ "%.2f"|format(grand_total_importe) }}</td>
                 </tr>
@@ -351,7 +350,7 @@
 
         <div class="footer-address">
             <p>AV. CRUZ AZUL S/N COL. CENTRO, CD. COOPERATIVA CRUZ AZUL, TULA DE ALLENDE, HGO. C.P. 42840</p>
-            <p>TEL: (S) 01 (773) 785 1962 / 785 2231 E-MAIL: plantajubileo@prodigy.net.mx</p>
+            <p>TEL: (S) 01 (773) 785 1962 / 785 2231 E-MAIL: pampajubileo@googlegroups.net</p>
             <p>FTVE - 12</p>
         </div>
     </div>
